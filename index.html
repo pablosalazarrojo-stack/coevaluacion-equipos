@@ -439,7 +439,7 @@ td.r,th.r{text-align:right}
       var e=S.evals[x.m], cls="mate", st, right;
       if(e){
         cls+=" hecho";
-        st='<span class="mini" aria-hidden="true">'+e.d.map(function(v){ return '<i style="height:18px"><b style="height:'+Math.round((v-MIN)/(MAX-MIN)*100)+'%"></b></i>'; }).join("")+'</span>';
+        st='<span class="mini" aria-hidden="true">'+e.d.map(function(v){ return '<i style="height:18px"><b style="height:'+Math.round(v/MAX*100)+'%;background:'+COLOR[v].f+'"></b></i>'; }).join("")+'</span>';
         right='<span class="sc num">'+f2(prom(e.d))+'<small>/4</small></span>';
       }else if(x.m===sig){ cls+=" sigue"; st='<p class="st">'+t("sigue")+'</p>'; right='<span class="go">›</span>'; }
       else { st='<p class="st">'+t("pendiente")+'</p>'; right='<span class="go">›</span>'; }
