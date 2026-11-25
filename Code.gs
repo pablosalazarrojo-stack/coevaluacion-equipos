@@ -8,10 +8,11 @@
  * ejecutar setup → Implementar como aplicación web (ejecutar como yo, acceso: cualquiera).
  */
 
-const CATS = ["Categoría 1", "Categoría 2", "Categoría 3", "Categoría 4", "Categoría 5"];
+const CATS = ["Aporta ideas y conocimientos útiles", "Cumple con lo asignado o comprometido",
+  "Escucha y respeta acuerdos", "Se concentra y colabora en reuniones", "Volvería a hacer equipo"];
 const MIN = 1, MAX = 4;
 const ADMIN_INICIAL = "CAMBIAR";
-/* [matrícula, nombre, grupo, equipo] — solo en el editor de Apps Script */
+/* [matrícula, nombre, grupo ("CCM 515"), equipo ("Equipo 2")] — solo en el editor de Apps Script */
 const ALUMNOS = [];
 
 const NC = CATS.length;
@@ -108,7 +109,8 @@ function companeros(a) {
   return alumnos().filter(function (x) { return x.g === a.g && x.e === a.e && x.m !== a.m; });
 }
 
-function pila(nombre) { const i = nombre.indexOf(","); return i >= 0 ? nombre.slice(i + 1).trim() : nombre; }
+/* "Apellidos, Nombre" o "Nombre Apellidos" (algunas listas vienen así) */
+function pila(nombre) { const i = nombre.indexOf(","); return i >= 0 ? (nombre.slice(i + 1).trim() || nombre) : nombre.split(" ")[0]; }
 function bonito(nombre) { const i = nombre.indexOf(","); return i >= 0 ? (nombre.slice(i + 1).trim() + " " + nombre.slice(0, i).trim()) : nombre; }
 
 function filas() {
@@ -198,10 +200,13 @@ function reiniciar(grupo) {
   lock.waitLock(30000);
   try {
     const sh = hoja();
+    /* se borra por la lista del grupo (quién evalúa), no por la columna grupo */
+    const ms = {};
+    alumnos().forEach(function (x) { if (!grupo || x.g === grupo) ms[x.m] = true; });
     if (sh.getLastRow() > 1) {
-      const v = sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues();
+      const v = sh.getRange(2, 1, sh.getLastRow() - 1, 3).getValues();
       for (let i = v.length - 1; i >= 0; i--) {
-        if (!grupo || String(v[i][0]) === grupo) sh.deleteRow(i + 2);
+        if (!grupo || ms[norm(v[i][2])]) sh.deleteRow(i + 2);
       }
     }
     props().setProperty("RONDA", String(Date.now()));
