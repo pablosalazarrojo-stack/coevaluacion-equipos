@@ -141,7 +141,8 @@ td.r,th.r{text-align:right}
 .groups{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .gbtn{border:none;border-top:4px solid var(--tinta);background:var(--papel);padding:18px 16px;text-align:left;display:flex;flex-direction:column;gap:6px}
 .gbtn:hover{border-top-color:var(--naranja)}
-.gbtn .g{font-family:var(--cond);font-size:54px;font-weight:800;line-height:.9}
+.gbtn .g{font-family:var(--cond);font-size:54px;font-weight:800;line-height:.9;display:flex;align-items:baseline;gap:8px}
+.gbtn .g small{font-size:26px;font-weight:600;color:var(--naranja-txt);letter-spacing:1px}
 .gbtn .s{font-size:14px;color:var(--gris)}
 .kp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .kp div{border-top:2px solid var(--tinta);padding-top:8px;display:flex;flex-direction:column}
@@ -274,7 +275,7 @@ td.r,th.r{text-align:right}
 (function(){
   "use strict";
   var CONFIG={ API:"https://script.google.com/macros/s/AKfycbz8hXEjGcaSENeXA34f_8Myxc8RSevFccFHX-sJNNxpBRAlcs8_-zRFzzYaEdQXgmxh/exec" };
-  var GRUPOS_EN=["502"]; /* grupos que ven el app en inglés */
+  var GRUPOS_EN=["CCM 502","CCM 504","CSF 502","CSF 507"]; /* grupos que ven el app en inglés */
   /* Rubros y lo que significa cada nivel */
   var NIVELES={es:{1:"Debe mejorar",2:"Suficiente",3:"Buen trabajo",4:"Excelente trabajo"},
                en:{1:"Must improve",2:"Enough",3:"Good job",4:"Excellent job"}};
@@ -609,7 +610,8 @@ td.r,th.r{text-align:right}
       var env=al.filter(function(a){ return a.estado==="enviado"; }).length;
       var eq=[]; al.forEach(function(a){ if(eq.indexOf(a.equipo)<0) eq.push(a.equipo); });
       var s=en?(al.length+" students · "+eq.length+" teams<br>"+env+" submitted"):(al.length+" alumnos · "+eq.length+" equipos<br>"+env+" ya enviaron");
-      return '<button class="gbtn" data-g="'+esc(g)+'"><span class="label">'+(en?"Group":"Grupo")+'</span><span class="g">'+esc(g)+'</span><span class="s">'+s+'</span></button>';
+      var pz=String(g).split(" "), camp=pz.length>1?pz[0]:"", num=pz[pz.length-1];
+      return '<button class="gbtn" data-g="'+esc(g)+'"><span class="label">'+(en?"Group":"Grupo")+(en?" · English":"")+'</span><span class="g">'+(camp?'<small>'+esc(camp)+'</small>':'')+esc(num)+'</span><span class="s">'+s+'</span></button>';
     }).join("");
   }
   $("groups").addEventListener("click",function(ev){ var b=ev.target.closest("button[data-g]"); if(b) abreGrupo(b.getAttribute("data-g")); });
@@ -649,7 +651,7 @@ td.r,th.r{text-align:right}
       return [a.grupo,eqNom(a.equipo),a.nombre,a.matricula,st[a.estado]||a.estado,a.recibidas].concat(cats().map(function(_,i){ return a.porCat?a.porCat[i]:""; }),[a.promedio==null?"":a.promedio]);
     }));
   }
-  function nombreArchivo(ext){ return (LANG==="en"?"team-peer-evaluation-group-":"coevaluacion-equipo-grupo-")+grupo+"-"+new Date().toISOString().slice(0,10)+"."+ext; }
+  function nombreArchivo(ext){ return (LANG==="en"?"team-peer-evaluation-group-":"coevaluacion-equipo-grupo-")+String(grupo).replace(/\s+/g,"-")+"-"+new Date().toISOString().slice(0,10)+"."+ext; }
   function bajar(blob,nombre){
     var url=URL.createObjectURL(blob), a=document.createElement("a"); a.href=url; a.download=nombre;
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(url); },2000);
