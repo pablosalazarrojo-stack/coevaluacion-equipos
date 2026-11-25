@@ -34,7 +34,11 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 /* encabezado */
 .top{display:flex;align-items:center;gap:12px}
 .sq{width:14px;height:14px;background:var(--naranja);flex:none}
-.eyebrow{font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase}
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;line-height:1.35}
+.eyebrow .en{color:var(--gris)}
+.top.mat{align-items:flex-start}
+.top.mat .sq{margin-top:2px}
+.top.mat .eyebrow{letter-spacing:1px;font-size:12px}
 .sp{flex:1}
 .salir{border:2px solid var(--tinta);background:transparent;padding:5px 12px;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
 .bars{display:flex;gap:5px}
@@ -163,7 +167,7 @@ td.r,th.r{text-align:right}
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><span class="sq"></span><span class="eyebrow" id="eyebrow">Coevaluación de equipo</span><span class="sp"></span><button class="salir" id="salir" data-i18n="salir" hidden>Salir</button></div>
+  <div class="top"><span class="sq"></span><span class="eyebrow" id="eyebrow"></span><span class="sp"></span><button class="salir" id="salir" data-i18n="salir" hidden>Salir</button></div>
 
   <!-- entrar (bilingüe: todavía no sabemos el grupo) -->
   <section id="vLogin" hidden>
@@ -261,7 +265,7 @@ td.r,th.r{text-align:right}
     </div>
   </section>
 
-  <p class="foot" data-i18n="foot">Innovación con enfoque de mercado</p>
+  <p class="foot" id="foot" data-i18n="foot">Innovación con enfoque de mercado</p>
 </div>
 <div class="toast" id="toast" hidden></div>
 <div class="ptr" id="ptr" aria-hidden="true"></div>
@@ -370,6 +374,10 @@ td.r,th.r{text-align:right}
     VISTAS.forEach(function(x){ $(x).hidden=(x!==v); });
     var alumno=S&&(v==="vIntro"||v==="vMenu"||v==="vListo"||v==="vEval");
     $("salir").hidden=!alumno;
+    /* portada: el nombre de la materia arriba, en español e inglés; sin pie */
+    var portada=(v==="vLogin");
+    $("foot").hidden=portada; document.querySelector(".top").classList.toggle("mat",portada);
+    if(portada){ $("eyebrow").innerHTML='Innovación con enfoque de mercado<br><span class="en">Market-based Innovation</span>'; window.scrollTo(0,0); return; }
     $("eyebrow").textContent=alumno?t("grupoEq",{g:S.grupo,e:eqNom(S.equipo)}):(v==="vProfe"?(LANG==="es"&&!grupoAbierto()?"Panel del profe · Teacher panel":t("panel")):"Coevaluación de equipo");
     window.scrollTo(0,0);
   }
