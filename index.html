@@ -90,6 +90,18 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .mini i{display:block;width:8px;background:var(--neutro);position:relative}
 .mini i b{position:absolute;left:0;right:0;bottom:0;background:var(--naranja)}
 
+/* antes de empezar */
+.intro{font-family:var(--serif);font-size:21px;line-height:1.4;border-left:4px solid var(--naranja);padding-left:16px}
+.pasos{list-style:none;margin:0;padding:0;counter-reset:p;display:flex;flex-direction:column}
+.pasos li{counter-increment:p;display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:baseline;border-top:2px solid var(--tinta);padding:12px 0;font-weight:500}
+.pasos li:last-child{border-bottom:2px solid var(--tinta)}
+.pasos li::before{content:counter(p);font-family:var(--serif);font-size:26px;font-weight:500;color:var(--naranja-txt);line-height:1}
+.escala{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.escala div{background:var(--papel);border-top:4px solid var(--tinta);padding:10px;display:flex;flex-direction:column;gap:4px}
+.escala b{font-family:var(--serif);font-size:32px;font-weight:500;line-height:1}
+.escala span{font-size:13px;font-weight:500;line-height:1.25}
+@media (max-width:420px){.escala{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
 /* evaluar */
 .cats{display:flex;flex-direction:column}
 .cat{border-top:2px solid var(--tinta);padding:16px 0 10px;display:flex;flex-direction:column;gap:4px}
@@ -97,11 +109,12 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .cat.falta{border-top-color:var(--naranja)}
 .cat .hd{display:flex;align-items:flex-start;gap:12px}
 .cat .t{flex:1;min-width:0}
-.cat .t h3{font-family:var(--serif);font-size:22px;font-weight:500;line-height:1.15}
-.cat .t p{font-size:14px;color:var(--gris);margin-top:2px;min-height:1em}
+.cat .t h3{font-family:var(--serif);font-size:20px;font-weight:500;line-height:1.15}
+.cat .t p{font-size:14px;font-weight:700;color:var(--gris);margin-top:2px;min-height:1em}
 .cat .v{font-family:var(--serif);font-size:44px;font-weight:500;line-height:1;color:var(--neutro);font-variant-numeric:tabular-nums}
 .cat .v small{font-size:18px;color:var(--gris)}
 .cat.ok .v{color:var(--naranja-txt)}
+.cat.ok .t p{color:var(--naranja-txt)}
 .cat .tag{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--naranja-txt)}
 .ticks{display:flex;justify-content:space-between;padding:0 6px;font-size:14px;font-weight:700;color:var(--gris);margin-top:-4px}
 .ticks span.on{color:var(--tinta)}
@@ -164,6 +177,21 @@ td.r,th.r{text-align:right}
       <button class="btn or" id="bLogin">Entrar · Enter</button>
     </form>
     <button class="link" id="aProfe">Soy el profe · I’m the teacher</button>
+  </section>
+
+  <!-- antes de empezar -->
+  <section id="vIntro" hidden>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span class="label" data-i18n="antes"></span>
+      <h1 class="title" id="introHola"></h1>
+    </div>
+    <p class="intro" data-i18n="introTxt"></p>
+    <ol class="pasos" id="pasos"></ol>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span class="label" data-i18n="escalaT"></span>
+      <div class="escala" id="escala"></div>
+    </div>
+    <button class="btn or" id="bAcuerdo" data-i18n="deAcuerdo"></button>
   </section>
 
   <!-- compañeros -->
@@ -243,9 +271,19 @@ td.r,th.r{text-align:right}
   "use strict";
   var CONFIG={ API:"https://script.google.com/macros/s/AKfycbz8hXEjGcaSENeXA34f_8Myxc8RSevFccFHX-sJNNxpBRAlcs8_-zRFzzYaEdQXgmxh/exec" };
   var GRUPOS_EN=["502"]; /* grupos que ven el app en inglés */
-  /* Lo que significa cada nivel (se llena después). */
-  var NIVELES={es:{1:"",2:"",3:"",4:""}, en:{1:"",2:"",3:"",4:""}};
-  var CAT={es:["Categoría 1","Categoría 2","Categoría 3","Categoría 4","Categoría 5"], en:["Category 1","Category 2","Category 3","Category 4","Category 5"]};
+  /* Rubros y lo que significa cada nivel */
+  var NIVELES={es:{1:"Debe mejorar",2:"Suficiente",3:"Buen trabajo",4:"Excelente trabajo"},
+               en:{1:"Must improve",2:"Enough",3:"Good job",4:"Excellent job"}};
+  var CAT={es:["Aporta ideas y conocimientos útiles",
+               "Cumple con las actividades que se le asignan o a las que se compromete",
+               "Escucha con atención y respeta las opiniones de la mayoría y los acuerdos del grupo",
+               "En las reuniones del equipo se concentra en trabajar y colabora con responsabilidad",
+               "Recomendaría volver a hacer equipo con esta persona"],
+           en:["Provides useful ideas and knowledge",
+               "Performs activities that are assigned or committed to",
+               "Listens carefully and respects the opinions of the majority and the agreements made within the group",
+               "During group meetings, she/he concentrates on working and collaborates responsibly",
+               "I would recommend teaming up with this person again"]};
   var MIN=1, MAX=4, NC=CAT.es.length;
 
   var T={
@@ -264,7 +302,10 @@ td.r,th.r{text-align:right}
       reset:"Borrar las respuestas de este grupo",resetSeguro:"¿Seguro? Se borra todo el grupo {g}. Toca otra vez",borrando:"Borrando…",enCero:"Grupo {g} en cero",
       preparando:"Preparando…",descargado:"CSV descargado",noSePudo:"No se pudo: ",foot:"Innovación con enfoque de mercado",
       jala:"↓ Jala para actualizar",suelta:"↑ Suelta para actualizar",actualizando:"Actualizando…",actualizado:"Actualizado",
-      csvHead:["grupo","equipo","nombre","matricula","estatus","evaluaciones_recibidas"],csvProm:"promedio",stEnv:"enviado",stCur:"en curso",stNo:"sin empezar"},
+      csvHead:["grupo","equipo","nombre","matricula","estatus","evaluaciones_recibidas"],csvProm:"promedio",stEnv:"enviado",stCur:"en curso",stNo:"sin empezar",
+      antes:"Antes de empezar",escalaT:"Cómo calificar",deAcuerdo:"De acuerdo",
+      introTxt:"Durante estas 10 semanas cada integrante de tu equipo aportó algo distinto, y ahora te toca reconocerlo. Tu calificación refleja el impacto que tuvo cada compañero en los resultados. Te pido que revises cada rubro con honestidad: si calificas igual a todos, le quitas valor al esfuerzo de quien más se comprometió. Confío en tu criterio.",
+      pasos:["Completa la coevaluación para tu equipo.","Califica a cada uno de tus compañeros de equipo.","Reflexiona sobre el desempeño realizado en esta materia.","Asigna a cada uno una calificación del 1 al 4."]},
     en:{salir:"Log out",eyebrow:"Team peer evaluation",panel:"Teacher panel",hola:"Hi, ",grupoEq:"Group {g} · {e}",de:"{a} of {b}",
       evaluados:"teammates rated",todos:"You’ve rated everyone! Review and submit.",sigue:"Next · tap to rate",pendiente:"Pending",
       enviar:"Submit my ratings",faltan:"{n} left to rate",sinComp:"No teammates found",ajustar:"Until you submit, you can go back to any teammate and adjust their ratings.",
@@ -280,7 +321,10 @@ td.r,th.r{text-align:right}
       reset:"Delete this group’s responses",resetSeguro:"Sure? All of group {g} will be deleted. Tap again",borrando:"Deleting…",enCero:"Group {g} reset",
       preparando:"Preparing…",descargado:"CSV downloaded",noSePudo:"Couldn’t do it: ",foot:"Market-based Innovation",
       jala:"↓ Pull to refresh",suelta:"↑ Release to refresh",actualizando:"Refreshing…",actualizado:"Up to date",
-      csvHead:["group","team","name","student_id","status","ratings_received"],csvProm:"average",stEnv:"submitted",stCur:"in progress",stNo:"not started"}
+      csvHead:["group","team","name","student_id","status","ratings_received"],csvProm:"average",stEnv:"submitted",stCur:"in progress",stNo:"not started",
+      antes:"Before you start",escalaT:"Rating scale",deAcuerdo:"I agree",
+      introTxt:"Over these 10 weeks, each member of your team contributed something different, and now it’s your turn to recognize it. Your rating reflects the impact each teammate had on the results. Please review each criterion honestly: if you give everyone the same rating, you take value away from the effort of whoever committed the most. I trust your judgment.",
+      pasos:["Complete the peer evaluation for your team.","Rate each of your teammates.","Reflect on the work done in this course.","Give each one a rating from 1 to 4."]}
   };
   /* mensajes del servidor (vienen en español) */
   var ERR_EN=[[/No encontramos/,"We couldn’t find that student ID. Check it: it starts with A0…"],[/Ya enviaste/,"You already submitted your ratings."],
@@ -321,11 +365,12 @@ td.r,th.r{text-align:right}
   }
 
   /* ---------- vistas ---------- */
-  var VISTAS=["vLogin","vMenu","vEval","vListo","vProfe"];
+  var VISTAS=["vLogin","vIntro","vMenu","vEval","vListo","vProfe"];
   function ver(v){
     VISTAS.forEach(function(x){ $(x).hidden=(x!==v); });
-    $("salir").hidden=!(S&&(v==="vMenu"||v==="vListo"||v==="vEval"));
-    $("eyebrow").textContent=(S&&(v==="vMenu"||v==="vListo"||v==="vEval"))?t("grupoEq",{g:S.grupo,e:eqNom(S.equipo)}):(v==="vProfe"?(LANG==="es"&&!grupoAbierto()?"Panel del profe · Teacher panel":t("panel")):"Coevaluación de equipo");
+    var alumno=S&&(v==="vIntro"||v==="vMenu"||v==="vListo"||v==="vEval");
+    $("salir").hidden=!alumno;
+    $("eyebrow").textContent=alumno?t("grupoEq",{g:S.grupo,e:eqNom(S.equipo)}):(v==="vProfe"?(LANG==="es"&&!grupoAbierto()?"Panel del profe · Teacher panel":t("panel")):"Coevaluación de equipo");
     window.scrollTo(0,0);
   }
   function grupoAbierto(){ return !$("pGrupo").hidden; }
@@ -344,7 +389,7 @@ td.r,th.r{text-align:right}
     idioma(langDe(o.grupo));
     var loc=leeLocal(o.matricula);
     if(loc&&loc.ronda!==o.ronda) loc=null;
-    S={m:o.matricula,nombre:o.nombre,grupo:o.grupo,equipo:o.equipo,ronda:o.ronda,companeros:o.companeros||[],evals:o.evals||{},pend:[],enviado:!!o.enviado};
+    S={m:o.matricula,nombre:o.nombre,grupo:o.grupo,equipo:o.equipo,ronda:o.ronda,companeros:o.companeros||[],evals:o.evals||{},pend:[],enviado:!!o.enviado,acepto:!!(loc&&loc.acepto)};
     var ids=S.companeros.map(function(c){ return c.m; });
     if(loc&&!S.enviado&&loc.evals){
       for(var m in loc.evals){
@@ -354,8 +399,17 @@ td.r,th.r{text-align:right}
       }
     }
     guardaLocal();
-    if(S.enviado) pintaListo(); else { pintaMenu(); flush(); }
+    if(S.enviado) pintaListo(); else { if(S.acepto) pintaMenu(); else pintaIntro(); flush(); }
   }
+
+  /* ---------- antes de empezar (una vez por alumno) ---------- */
+  function pintaIntro(){
+    $("introHola").textContent=t("hola")+S.nombre;
+    $("pasos").innerHTML=t("pasos").map(function(p){ return '<li>'+esc(p)+'</li>'; }).join("");
+    $("escala").innerHTML=[1,2,3,4].map(function(k){ return '<div><b class="num">'+k+'</b><span>'+esc(NIVELES[LANG][k])+'</span></div>'; }).join("");
+    ver("vIntro");
+  }
+  $("bAcuerdo").addEventListener("click",function(){ S.acepto=true; guardaLocal(); pintaMenu(); });
 
   $("salir").addEventListener("click",function(){
     try{ localStorage.removeItem("coeq:yo"); }catch(e){}
@@ -641,7 +695,7 @@ td.r,th.r{text-align:right}
     if(loc&&loc.m&&loc.companeros){
       S=loc; if(!S.pend) S.pend=[];
       idioma(langDe(S.grupo));
-      if(S.enviado) pintaListo(); else pintaMenu();
+      if(S.enviado) pintaListo(); else if(S.acepto) pintaMenu(); else pintaIntro();
       api("login",{matricula:S.m}).then(function(o){ if(S&&S.m===o.matricula&&(!actual||S.ronda!==o.ronda)) aplicaServidor(o); }).catch(function(){});
     }else { idioma("es"); ver("vLogin"); }
   }
