@@ -17,7 +17,11 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html,body{margin:0;background:var(--crema)}
+html,body{margin:0;background:var(--crema);overscroll-behavior-y:contain}
+/* jalar para actualizar (solo la pantalla actual) */
+.ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 10px);transform:translate(-50%,-80px);z-index:45;background:var(--tinta);color:var(--crema);padding:9px 16px;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;transition:transform .12s ease-out;pointer-events:none}
+.ptr.listo{background:var(--naranja);color:var(--tinta)}
+.ptr.drag{transition:none}
 body{color:var(--tinta);font-family:var(--sans);font-size:17px;line-height:1.45;
   padding:calc(20px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(40px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
 .wrap{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:24px;width:100%;min-width:0}
@@ -232,6 +236,7 @@ td.r,th.r{text-align:right}
   <p class="foot" data-i18n="foot">Innovación con enfoque de mercado</p>
 </div>
 <div class="toast" id="toast" hidden></div>
+<div class="ptr" id="ptr" aria-hidden="true"></div>
 
 <script>
 (function(){
@@ -258,6 +263,7 @@ td.r,th.r{text-align:right}
       nota:"Promedio = lo que le dieron sus compañeros de equipo (1 a 4), contando solo las evaluaciones enviadas.",
       reset:"Borrar las respuestas de este grupo",resetSeguro:"¿Seguro? Se borra todo el grupo {g}. Toca otra vez",borrando:"Borrando…",enCero:"Grupo {g} en cero",
       preparando:"Preparando…",descargado:"CSV descargado",noSePudo:"No se pudo: ",foot:"Innovación con enfoque de mercado",
+      jala:"↓ Jala para actualizar",suelta:"↑ Suelta para actualizar",actualizando:"Actualizando…",actualizado:"Actualizado",
       csvHead:["grupo","equipo","nombre","matricula","estatus","evaluaciones_recibidas"],csvProm:"promedio",stEnv:"enviado",stCur:"en curso",stNo:"sin empezar"},
     en:{salir:"Log out",eyebrow:"Team peer evaluation",panel:"Teacher panel",hola:"Hi, ",grupoEq:"Group {g} · {e}",de:"{a} of {b}",
       evaluados:"teammates rated",todos:"You’ve rated everyone! Review and submit.",sigue:"Next · tap to rate",pendiente:"Pending",
@@ -273,6 +279,7 @@ td.r,th.r{text-align:right}
       nota:"Average = what their teammates gave them (1 to 4), counting only submitted evaluations.",
       reset:"Delete this group’s responses",resetSeguro:"Sure? All of group {g} will be deleted. Tap again",borrando:"Deleting…",enCero:"Group {g} reset",
       preparando:"Preparing…",descargado:"CSV downloaded",noSePudo:"Couldn’t do it: ",foot:"Market-based Innovation",
+      jala:"↓ Pull to refresh",suelta:"↑ Release to refresh",actualizando:"Refreshing…",actualizado:"Up to date",
       csvHead:["group","team","name","student_id","status","ratings_received"],csvProm:"average",stEnv:"submitted",stCur:"in progress",stNo:"not started"}
   };
   /* mensajes del servidor (vienen en español) */
@@ -498,20 +505,37 @@ td.r,th.r{text-align:right}
   /* ---------- profe ---------- */
   var pass="", datos=null, grupo=null, tRef=null;
   $("aProfe").addEventListener("click",function(){ $("fProfe").hidden=false; $("pGrupos").hidden=true; $("pGrupo").hidden=true; ver("vProfe"); $("pass").focus(); });
+  /* el panel recuerda dónde estaba (solo mientras la pestaña siga abierta), para que una recarga no regrese al inicio */
+  function marca(h){ try{ history.replaceState(null,"",location.pathname+location.search+h); }catch(e){} }
+  function guardaPass(p){ try{ if(p) sessionStorage.setItem("coeq:pp",p); else sessionStorage.removeItem("coeq:pp"); }catch(e){} }
   $("bProfeBack").addEventListener("click",function(){
     if(!$("pGrupo").hidden){ clearInterval(tRef); grupo=null; pintaGrupos(); return; }
-    pass=""; $("pass").value=""; idioma("es"); arranca();
+    pass=""; $("pass").value=""; guardaPass(""); marca(""); idioma("es"); arranca();
   });
   $("fProfe").addEventListener("submit",function(ev){
     ev.preventDefault(); pass=$("pass").value; $("eProfe").textContent="";
-    carga().then(function(){ $("fProfe").hidden=true; pintaGrupos(); }).catch(function(e){ $("eProfe").textContent=/Contraseña/.test(e.message)?"Contraseña incorrecta · Wrong password":e.message; });
+    carga().then(function(){ guardaPass(pass); $("fProfe").hidden=true; pintaGrupos(); }).catch(function(e){ $("eProfe").textContent=/Contraseña/.test(e.message)?"Contraseña incorrecta · Wrong password":e.message; });
   });
+  function abreGrupo(g){
+    grupo=g; pintaGrupo(); clearInterval(tRef);
+    tRef=setInterval(function(){ carga().then(function(){ if(grupo) pintaGrupo(); }).catch(function(){}); },20000);
+  }
+  function retomaPanel(){
+    var pp=null; try{ pp=sessionStorage.getItem("coeq:pp"); }catch(e){}
+    var g=(location.hash.match(/^#profe-(.+)$/)||[])[1];
+    ver("vProfe");
+    if(!pp) return;
+    pass=pp; $("fProfe").hidden=true;
+    carga().then(function(){ if(g&&grupos().indexOf(decodeURIComponent(g))>=0) abreGrupo(decodeURIComponent(g)); else pintaGrupos(); })
+      .catch(function(){ pass=""; guardaPass(""); $("fProfe").hidden=false; });
+  }
   function carga(){ return api("profe",{pass:pass}).then(function(o){ datos=o; return o; }); }
   function grupos(){ var g=[]; datos.alumnos.forEach(function(a){ if(g.indexOf(a.grupo)<0) g.push(a.grupo); }); return g.sort(); }
   function pintaGrupos(){
     idioma("es");
     $("pGrupo").hidden=true; $("pGrupos").hidden=false;
     $("bProfeBack").textContent="‹ Salir del panel · Exit";
+    marca("#profe");
     ver("vProfe");
     $("groups").innerHTML=grupos().map(function(g){
       var en=langDe(g)==="en";
@@ -522,12 +546,13 @@ td.r,th.r{text-align:right}
       return '<button class="gbtn" data-g="'+esc(g)+'"><span class="label">'+(en?"Group":"Grupo")+'</span><span class="g">'+esc(g)+'</span><span class="s">'+s+'</span></button>';
     }).join("");
   }
-  $("groups").addEventListener("click",function(ev){ var b=ev.target.closest("button[data-g]"); if(!b) return; grupo=b.getAttribute("data-g"); pintaGrupo(); clearInterval(tRef); tRef=setInterval(function(){ carga().then(function(){ if(grupo) pintaGrupo(); }).catch(function(){}); },20000); });
+  $("groups").addEventListener("click",function(ev){ var b=ev.target.closest("button[data-g]"); if(b) abreGrupo(b.getAttribute("data-g")); });
   $("bOtro").addEventListener("click",function(){ clearInterval(tRef); grupo=null; pintaGrupos(); });
   function pintaGrupo(){
     idioma(langDe(grupo));
     $("pGrupos").hidden=true; $("pGrupo").hidden=false; $("bProfeBack").textContent=t("grupos");
-    ver("vProfe");
+    marca("#profe-"+encodeURIComponent(grupo));
+    var y=window.scrollY; ver("vProfe"); if(refrescando) window.scrollTo(0,y);
     var al=datos.alumnos.filter(function(a){ return a.grupo===grupo; });
     $("gTit").textContent=t("grupo")+" "+grupo;
     $("kEnv").textContent=al.filter(function(a){ return a.estado==="enviado"; }).length;
@@ -620,8 +645,39 @@ td.r,th.r{text-align:right}
       api("login",{matricula:S.m}).then(function(o){ if(S&&S.m===o.matricula&&(!actual||S.ronda!==o.ronda)) aplicaServidor(o); }).catch(function(){});
     }else { idioma("es"); ver("vLogin"); }
   }
+  /* ---------- jalar hacia abajo: actualiza solo la pantalla actual ---------- */
+  var refrescando=false, y0=null, dy=0, UMBRAL=70, ptr=$("ptr");
+  function vista(){ for(var i=0;i<VISTAS.length;i++) if(!$(VISTAS[i]).hidden) return VISTAS[i]; return ""; }
+  function ptrPos(p){ ptr.style.transform="translate(-50%,"+(-80+p)+"px)"; }
+  function refresca(){
+    if(refrescando) return;
+    refrescando=true; ptr.classList.remove("listo"); ptr.textContent=t("actualizando"); ptrPos(80);
+    var v=vista(), p;
+    if(v==="vProfe"&&pass) p=carga().then(function(){ if(grupo&&!$("pGrupo").hidden) pintaGrupo(); else if(!$("pGrupos").hidden) pintaGrupos(); });
+    else if(S&&(v==="vMenu"||v==="vListo")) p=api("login",{matricula:S.m}).then(function(o){ if(S&&S.m===o.matricula) aplicaServidor(o); });
+    else p=Promise.resolve(); /* en Evaluar o en Entrar no se toca nada, para no perder lo que llevan */
+    p.then(function(){ toast(t("actualizado")); }).catch(function(e){ toast(t("noSePudo")+errTxt(e.message)); })
+      .then(function(){ refrescando=false; ptrPos(0); });
+  }
+  document.addEventListener("touchstart",function(e){
+    y0=(!refrescando&&window.scrollY<=0&&e.touches.length===1&&!(e.target.closest&&e.target.closest('input[type="range"]')))?e.touches[0].clientY:null; dy=0;
+  },{passive:true});
+  document.addEventListener("touchmove",function(e){
+    if(y0==null) return;
+    dy=e.touches[0].clientY-y0;
+    if(dy<=0||window.scrollY>0){ ptr.classList.remove("drag"); ptrPos(0); return; }
+    var p=Math.min(dy*0.6,90); ptr.classList.add("drag"); ptrPos(p);
+    var ya=dy>UMBRAL; ptr.classList.toggle("listo",ya); ptr.textContent=ya?t("suelta"):t("jala");
+  },{passive:true});
+  document.addEventListener("touchend",function(){
+    if(y0==null) return;
+    ptr.classList.remove("drag");
+    if(dy>UMBRAL) refresca(); else ptrPos(0);
+    y0=null; dy=0;
+  });
+
   idioma("es");
-  if(location.hash==="#profe"){ ver("vProfe"); } else arranca();
+  if(/^#profe/.test(location.hash)){ retomaPanel(); } else arranca();
 })();
 </script>
 </body>
