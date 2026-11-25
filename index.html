@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#F1EEE8">
-<title>Coevaluación de equipo</title>
+<title>Coevaluación de equipo · Team peer evaluation</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700&family=Barlow+Condensed:wght@600;800&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap">
 <style>
 /* Look H-FARM: crema, tinta y naranja; Newsreader para títulos, Archivo para texto, Barlow Condensed para la portada; esquinas rectas */
@@ -38,6 +38,7 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .bars i.on{background:var(--naranja)}
 .title{font-family:var(--serif);font-size:clamp(32px,8vw,44px);font-weight:500;line-height:1.08}
 .lede{font-family:var(--serif);font-size:20px;font-style:italic;line-height:1.35;color:var(--gris)}
+.lede.en{font-size:17px;margin-top:-12px}
 .cover{font-family:var(--cond);font-size:clamp(56px,16vw,92px);font-weight:800;line-height:.92;text-transform:uppercase}
 .cover span{color:var(--naranja-txt)}
 .label{font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--naranja-txt)}
@@ -128,101 +129,104 @@ td.r,th.r{text-align:right}
 .kp div.or{border-top-color:var(--naranja)}
 .team{display:flex;flex-direction:column;gap:6px}
 .team h3{font-family:var(--serif);font-size:24px;font-weight:500;display:flex;align-items:center;gap:10px}
+.warn{display:inline-flex;flex:none}
 .dot{display:inline-block;width:10px;height:10px;background:var(--neutro);margin-right:6px;vertical-align:middle}
 .dot.en{background:var(--verde)}
 .dot.cu{background:var(--naranja)}
 .st2{font-size:13px;color:var(--gris);white-space:nowrap}
 .avg{font-family:var(--serif);font-size:20px;font-weight:500}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.actions .btn{font-size:15px;letter-spacing:1.5px}
 .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 14px);transform:translateX(-50%);background:var(--tinta);color:var(--crema);padding:10px 18px;font-size:14px;font-weight:700;letter-spacing:1px;z-index:50;white-space:nowrap;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis}
 .foot{font-size:12px;color:var(--gris);text-align:center}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><span class="sq"></span><span class="eyebrow" id="eyebrow">Coevaluación de equipo</span><span class="sp"></span><button class="salir" id="salir" hidden>Salir</button></div>
+  <div class="top"><span class="sq"></span><span class="eyebrow" id="eyebrow">Coevaluación de equipo</span><span class="sp"></span><button class="salir" id="salir" data-i18n="salir" hidden>Salir</button></div>
 
-  <!-- entrar -->
+  <!-- entrar (bilingüe: todavía no sabemos el grupo) -->
   <section id="vLogin" hidden>
     <h1 class="cover">Coevaluación<br><span>de equipo</span></h1>
     <p class="lede">Califica a cada integrante de tu equipo. A ti no te calificas.</p>
+    <p class="lede en">Team peer evaluation: rate each member of your team. You don’t rate yourself.</p>
     <form class="field" id="fLogin" autocomplete="off">
-      <label class="label" for="mat">Tu matrícula</label>
+      <label class="label" for="mat">Tu matrícula · Student ID</label>
       <input id="mat" inputmode="text" autocapitalize="characters" spellcheck="false" placeholder="A01234567" maxlength="12" required>
       <p class="err" id="eLogin"></p>
-      <button class="btn or" id="bLogin">Entrar</button>
+      <button class="btn or" id="bLogin">Entrar · Enter</button>
     </form>
-    <button class="link" id="aProfe">Soy el profe</button>
+    <button class="link" id="aProfe">Soy el profe · I’m the teacher</button>
   </section>
 
   <!-- compañeros -->
   <section id="vMenu" hidden>
     <h1 class="title" id="hola">Hola</h1>
     <div class="prog">
-      <span class="label" id="miEq">Tu equipo</span>
-      <p class="big num" id="cuantos">0 de 0</p>
+      <span class="label" id="miEq"></span>
+      <p class="big num" id="cuantos">0</p>
       <div class="bars" id="pbars"></div>
-      <p class="s" id="menuSub">compañeros evaluados</p>
+      <p class="s" id="menuSub"></p>
     </div>
     <div class="list" id="mates"></div>
-    <p class="hint">Hasta que envíes, puedes volver a cualquier compañero y ajustar sus calificaciones.</p>
+    <p class="hint" data-i18n="ajustar"></p>
     <div class="pbar">
       <p class="err" id="eEnviar"></p>
-      <button class="btn" id="bEnviar" disabled>Enviar mis calificaciones</button>
+      <button class="btn" id="bEnviar" disabled></button>
     </div>
   </section>
 
   <!-- evaluar -->
   <section id="vEval" hidden>
-    <button class="back" id="bBack">‹ Mi equipo</button>
+    <button class="back" id="bBack" data-i18n="miEquipo"></button>
     <div style="display:flex;flex-direction:column;gap:8px">
-      <span class="label">Evalúas a</span>
-      <h1 class="title" id="evNm">Nombre</h1>
-      <p class="lede">Mueve cada barra del 1 al 4.</p>
+      <span class="label" data-i18n="evaluas"></span>
+      <h1 class="title" id="evNm"></h1>
+      <p class="lede" data-i18n="mueve"></p>
     </div>
     <div class="cats" id="cats"></div>
     <div class="pbar">
       <p class="err" id="eEval"></p>
-      <button class="btn or" id="bGuardar">Guardar y volver</button>
+      <button class="btn or" id="bGuardar" data-i18n="guardar"></button>
     </div>
   </section>
 
   <!-- enviado -->
   <section id="vListo" hidden>
-    <h1 class="cover">¡Enviado!</h1>
-    <p class="lede" id="listoSub">Gracias. Tus calificaciones ya llegaron.</p>
-    <table><thead><tr><th>Compañero</th><th class="r">Tu promedio</th></tr></thead><tbody id="listoT"></tbody></table>
+    <h1 class="cover" data-i18n="enviado"></h1>
+    <p class="lede" id="listoSub"></p>
+    <table><thead><tr><th data-i18n="companero"></th><th class="r" data-i18n="tuProm"></th></tr></thead><tbody id="listoT"></tbody></table>
   </section>
 
   <!-- profe -->
   <section id="vProfe" hidden>
-    <button class="back" id="bProfeBack">‹ Volver</button>
+    <button class="back" id="bProfeBack">‹ Volver · Back</button>
     <form class="field" id="fProfe" autocomplete="off">
-      <label class="label" for="pass">Contraseña del profe</label>
+      <label class="label" for="pass">Contraseña del profe · Teacher password</label>
       <input id="pass" type="password" inputmode="numeric" style="text-transform:none" required>
       <p class="err" id="eProfe"></p>
-      <button class="btn">Entrar</button>
+      <button class="btn">Entrar · Enter</button>
     </form>
     <div id="pGrupos" hidden style="display:flex;flex-direction:column;gap:18px">
-      <h1 class="title">Elige tu grupo</h1>
+      <h1 class="title">Elige tu grupo<br><span style="color:var(--gris);font-size:.6em;font-style:italic">Choose your group</span></h1>
       <div class="groups" id="groups"></div>
     </div>
     <div id="pGrupo" hidden style="display:flex;flex-direction:column;gap:20px">
-      <h1 class="title" id="gTit">Grupo</h1>
+      <h1 class="title" id="gTit"></h1>
       <div class="kp">
-        <div class="or"><b class="num" id="kEnv">0</b><span>enviaron</span></div>
-        <div><b class="num" id="kCur">0</b><span>van a medias</span></div>
-        <div><b class="num" id="kNo">0</b><span>sin empezar</span></div>
+        <div class="or"><b class="num" id="kEnv">0</b><span data-i18n="kEnv"></span></div>
+        <div><b class="num" id="kCur">0</b><span data-i18n="kCur"></span></div>
+        <div><b class="num" id="kNo">0</b><span data-i18n="kNo"></span></div>
       </div>
-      <div class="actions"><button class="btn or" id="bCsv">Exportar CSV</button><button class="btn line" id="bOtro">Cambiar grupo</button></div>
+      <div class="actions"><button class="btn or" id="bCsv" data-i18n="csv"></button><button class="btn line" id="bOtro" data-i18n="otro"></button></div>
       <p class="hint" id="pAct"></p>
       <div id="teams" style="display:flex;flex-direction:column;gap:26px"></div>
-      <p class="hint">Promedio = lo que le dieron sus compañeros de equipo (1 a 4), contando solo las evaluaciones enviadas. Entre paréntesis, cuántas recibió.</p>
-      <button class="btn danger" id="bReset">Borrar las respuestas de este grupo</button>
+      <p class="hint" data-i18n="nota"></p>
+      <button class="btn danger" id="bReset"></button>
     </div>
   </section>
 
-  <p class="foot">Innovación con enfoque de mercado · Prof. Pablo Salazar Rojo</p>
+  <p class="foot" data-i18n="foot">Innovación con enfoque de mercado</p>
 </div>
 <div class="toast" id="toast" hidden></div>
 
@@ -230,16 +234,65 @@ td.r,th.r{text-align:right}
 (function(){
   "use strict";
   var CONFIG={ API:"https://script.google.com/macros/s/AKfycbz8hXEjGcaSENeXA34f_8Myxc8RSevFccFHX-sJNNxpBRAlcs8_-zRFzzYaEdQXgmxh/exec" };
+  var GRUPOS_EN=["502"]; /* grupos que ven el app en inglés */
   /* Lo que significa cada nivel (se llena después). */
-  var NIVELES={1:"",2:"",3:"",4:""};
-  var CATS=["Categoría 1","Categoría 2","Categoría 3","Categoría 4","Categoría 5"], MIN=1, MAX=4;
+  var NIVELES={es:{1:"",2:"",3:"",4:""}, en:{1:"",2:"",3:"",4:""}};
+  var CAT={es:["Categoría 1","Categoría 2","Categoría 3","Categoría 4","Categoría 5"], en:["Category 1","Category 2","Category 3","Category 4","Category 5"]};
+  var MIN=1, MAX=4, NC=CAT.es.length;
+
+  var T={
+    es:{salir:"Salir",eyebrow:"Coevaluación de equipo",panel:"Panel del profe",hola:"Hola, ",grupoEq:"Grupo {g} · {e}",de:"{a} de {b}",
+      evaluados:"compañeros evaluados",todos:"¡Ya evaluaste a todos! Revisa y envía.",sigue:"Sigue · tócalo para evaluar",pendiente:"Pendiente",
+      enviar:"Enviar mis calificaciones",faltan:"Te faltan {n}",sinComp:"No hay compañeros en tu equipo",ajustar:"Hasta que envíes, puedes volver a cualquier compañero y ajustar sus calificaciones.",
+      miEquipo:"‹ Mi equipo",evaluas:"Evalúas a",mueve:"Mueve cada barra del 1 al 4.",guardar:"Guardar y volver",sinMover:"Sin mover",
+      falta1:"Te falta 1 categoría por mover",faltaN:"Te faltan {n} categorías por mover",otraVez:". Si de verdad van en 1, toca Guardar otra vez.",guardado:"Guardado: ",
+      seguro:"¿Seguro? Ya no podrás cambiarlas. Toca otra vez",enviando:"Enviando…",reintento:"Mucha gente enviando… reintento {n}",noEnvio:"No se pudo enviar ({e}). Revisa tu internet e intenta otra vez.",
+      enviado:"¡Enviado!",gracias:"Gracias, {n}. Tus calificaciones de {k} compañeros ya llegaron.",companero:"Compañero",tuProm:"Tu promedio",
+      reinicio:"El profe reinició la evaluación. Toca Entrar para empezar de nuevo.",equipo:"Equipo",grupo:"Grupo",
+      kEnv:"enviaron",kCur:"van a medias",kNo:"sin empezar",csv:"Exportar CSV",otro:"Cambiar grupo",grupos:"‹ Grupos",act:"Se actualiza solo cada 20 segundos · ",
+      integrante:"Integrante",estatus:"Estatus",promedio:"Promedio",envio:"Envió",califico:"Calificó {a} de {b}",sinEmpezar:"Sin empezar",
+      warn:"Aún faltan integrantes por enviar",nota:"Promedio = lo que le dieron sus compañeros de equipo (1 a 4), contando solo las evaluaciones enviadas. ⚠ = aún faltan integrantes por enviar.",
+      reset:"Borrar las respuestas de este grupo",resetSeguro:"¿Seguro? Se borra todo el grupo {g}. Toca otra vez",borrando:"Borrando…",enCero:"Grupo {g} en cero",
+      preparando:"Preparando…",descargado:"CSV descargado",noSePudo:"No se pudo: ",foot:"Innovación con enfoque de mercado",
+      csvHead:["grupo","equipo","nombre","matricula","estatus","evaluaciones_recibidas"],csvProm:"promedio",stEnv:"enviado",stCur:"en curso",stNo:"sin empezar"},
+    en:{salir:"Log out",eyebrow:"Team peer evaluation",panel:"Teacher panel",hola:"Hi, ",grupoEq:"Group {g} · {e}",de:"{a} of {b}",
+      evaluados:"teammates rated",todos:"You’ve rated everyone! Review and submit.",sigue:"Next · tap to rate",pendiente:"Pending",
+      enviar:"Submit my ratings",faltan:"{n} left to rate",sinComp:"No teammates found",ajustar:"Until you submit, you can go back to any teammate and adjust their ratings.",
+      miEquipo:"‹ My team",evaluas:"You’re rating",mueve:"Move each slider from 1 to 4.",guardar:"Save and go back",sinMover:"Not moved",
+      falta1:"1 category hasn’t been moved",faltaN:"{n} categories haven’t been moved",otraVez:". If they really are a 1, tap Save again.",guardado:"Saved: ",
+      seguro:"Sure? You won’t be able to change them. Tap again",enviando:"Submitting…",reintento:"Lots of people submitting… retry {n}",noEnvio:"Couldn’t submit ({e}). Check your connection and try again.",
+      enviado:"Submitted!",gracias:"Thanks, {n}. Your ratings for {k} teammates are in.",companero:"Teammate",tuProm:"Your average",
+      reinicio:"The teacher restarted the evaluation. Tap Enter to start again.",equipo:"Team",grupo:"Group",
+      kEnv:"submitted",kCur:"in progress",kNo:"not started",csv:"Export CSV",otro:"Change group",grupos:"‹ Groups",act:"Updates every 20 seconds · ",
+      integrante:"Member",estatus:"Status",promedio:"Average",envio:"Submitted",califico:"Rated {a} of {b}",sinEmpezar:"Not started",
+      warn:"Some members haven’t submitted yet",nota:"Average = what their teammates gave them (1 to 4), counting only submitted evaluations. ⚠ = some members haven’t submitted yet.",
+      reset:"Delete this group’s responses",resetSeguro:"Sure? All of group {g} will be deleted. Tap again",borrando:"Deleting…",enCero:"Group {g} reset",
+      preparando:"Preparing…",descargado:"CSV downloaded",noSePudo:"Couldn’t do it: ",foot:"Market-based Innovation",
+      csvHead:["group","team","name","student_id","status","ratings_received"],csvProm:"average",stEnv:"submitted",stCur:"in progress",stNo:"not started"}
+  };
+  /* mensajes del servidor (vienen en español) */
+  var ERR_EN=[[/No encontramos/,"We couldn’t find that student ID. Check it: it starts with A0…"],[/Ya enviaste/,"You already submitted your ratings."],
+    [/Faltan calificaciones/,"Some ratings are missing."],[/fuera de rango/,"Rating out of range."],[/miembros de tu equipo/,"You can only rate members of your team."],
+    [/Contraseña incorrecta/,"Wrong password."]];
+
+  var LANG="es";
+  function t(k,v){ var s=(T[LANG][k]!=null?T[LANG][k]:T.es[k]); if(typeof s==="string"&&v) s=s.replace(/\{(\w+)\}/g,function(_,x){ return v[x]!=null?v[x]:""; }); return s; }
+  function idioma(l){
+    LANG=l==="en"?"en":"es"; document.documentElement.lang=LANG;
+    document.querySelectorAll("[data-i18n]").forEach(function(e){ e.textContent=t(e.getAttribute("data-i18n")); });
+  }
+  function langDe(g){ return GRUPOS_EN.indexOf(String(g))>=0?"en":"es"; }
+  function cats(){ return CAT[LANG]; }
+  function eqNom(e){ return LANG==="en"?String(e).replace(/^Equipo/,"Team"):e; }
+  function errTxt(m){ if(LANG!=="en") return m; for(var i=0;i<ERR_EN.length;i++) if(ERR_EN[i][0].test(m)) return ERR_EN[i][1]; return m; }
 
   function $(id){ return document.getElementById(id); }
   function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
   function prom(d){ var s=0; for(var i=0;i<d.length;i++) s+=d[i]; return s/d.length; }
   function f2(x){ return (Math.round(x*100)/100).toFixed(2); }
   var tt=null;
-  function toast(t){ var e=$("toast"); e.textContent=t; e.hidden=false; clearTimeout(tt); tt=setTimeout(function(){ e.hidden=true; },2600); }
+  function toast(s){ var e=$("toast"); e.textContent=s; e.hidden=false; clearTimeout(tt); tt=setTimeout(function(){ e.hidden=true; },2600); }
+  var WARN='<svg class="warn" width="24" height="22" viewBox="0 0 24 22" role="img" aria-label="{a}"><title>{a}</title><path d="M12 1.5 23 20.5H1Z" fill="#F5B800" stroke="#B98600" stroke-width="1.2" stroke-linejoin="round"/><rect x="11" y="7.5" width="2" height="7" fill="#101216"/><rect x="11" y="16.3" width="2" height="2" fill="#101216"/></svg>';
 
   /* ---------- estado ---------- */
   var S=null; // {m,nombre,grupo,equipo,ronda,companeros:[{m,nombre}],evals:{m:{d,t}},pend:[m],enviado}
@@ -249,27 +302,10 @@ td.r,th.r{text-align:right}
   function hechos(){ return S.companeros.filter(function(c){ return S.evals[c.m]; }).length; }
 
   function api(action,data){
-    if(!CONFIG.API) return demo(action,data);
     var body={action:action}; for(var k in data) body[k]=data[k];
     return fetch(CONFIG.API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)})
       .then(function(r){ return r.json(); })
       .then(function(o){ if(!o.ok) throw new Error(o.error||"Algo falló."); return o; });
-  }
-  /* modo prueba (sin hoja conectada) */
-  function demo(action,data){
-    return new Promise(function(res,rej){ setTimeout(function(){
-      if(action==="login"){
-        var m=String(data.matricula||"").toUpperCase();
-        if(!/^A0\d{7}$/.test(m)) return rej(new Error("No encontramos esa matrícula. Revísala: empieza con A0…"));
-        return res({ok:true,matricula:m,nombre:"Alumno de prueba",grupo:"502",equipo:"Equipo 1",ronda:"1",cats:CATS,min:1,max:4,
-          companeros:[{m:"A00000001",nombre:"Ana Pérez"},{m:"A00000002",nombre:"Luis García"},{m:"A00000003",nombre:"Sofía Ruiz"},{m:"A00000004",nombre:"Diego Torres"}],evals:{},enviado:false});
-      }
-      if(action==="profe"||action==="reset"){
-        var al=[]; [["502",["Equipo 1","Equipo 2"]],["515",["Equipo 2","Equipo 3"]]].forEach(function(g){ g[1].forEach(function(e,j){ for(var i=0;i<4;i++){ var st=i===0?"enviado":(i===1?"en curso":"sin empezar"); al.push({nombre:"Apellido "+(i+1)+", Alumno "+e.slice(-1)+(i+1),matricula:"A0000"+g[0]+j+i,grupo:g[0],equipo:e,estado:st,hechas:st==="enviado"?3:(st==="en curso"?1:0),porEvaluar:3,recibidas:i===3?0:2,porCat:i===3?null:[3,2.5,3.5,4,3],promedio:i===3?null:3.2}); } }); });
-        return res({ok:true,ronda:"1",cats:CATS,min:1,max:4,alumnos:al});
-      }
-      res({ok:true,t:Date.now()});
-    },300); });
   }
 
   /* ---------- vistas ---------- */
@@ -277,21 +313,23 @@ td.r,th.r{text-align:right}
   function ver(v){
     VISTAS.forEach(function(x){ $(x).hidden=(x!==v); });
     $("salir").hidden=!(S&&(v==="vMenu"||v==="vListo"||v==="vEval"));
-    $("eyebrow").textContent=S&&v!=="vProfe"&&v!=="vLogin"?("Grupo "+S.grupo+" · "+S.equipo):(v==="vProfe"?"Panel del profe":"Coevaluación de equipo");
+    $("eyebrow").textContent=(S&&(v==="vMenu"||v==="vListo"||v==="vEval"))?t("grupoEq",{g:S.grupo,e:eqNom(S.equipo)}):(v==="vProfe"?(LANG==="es"&&!grupoAbierto()?"Panel del profe · Teacher panel":t("panel")):"Coevaluación de equipo");
     window.scrollTo(0,0);
   }
+  function grupoAbierto(){ return !$("pGrupo").hidden; }
 
   /* ---------- entrar ---------- */
   $("fLogin").addEventListener("submit",function(ev){
     ev.preventDefault();
     var m=$("mat").value.toUpperCase().replace(/[^A-Z0-9]/g,""); if(!m) return;
-    $("eLogin").textContent=""; $("bLogin").disabled=true; $("bLogin").textContent="Entrando…";
-    api("login",{matricula:m}).then(aplicaServidor).catch(function(e){ $("eLogin").textContent=e.message; })
-      .then(function(){ $("bLogin").disabled=false; $("bLogin").textContent="Entrar"; });
+    $("eLogin").textContent=""; $("bLogin").disabled=true; $("bLogin").textContent="…";
+    api("login",{matricula:m}).then(aplicaServidor).catch(function(e){
+      $("eLogin").textContent=/No encontramos/.test(e.message)?"No encontramos esa matrícula · We couldn’t find that student ID (A0…)":e.message;
+    }).then(function(){ $("bLogin").disabled=false; $("bLogin").textContent="Entrar · Enter"; });
   });
 
   function aplicaServidor(o){
-    if(o.cats) CATS=o.cats; if(o.min) MIN=o.min; if(o.max) MAX=o.max;
+    idioma(langDe(o.grupo));
     var loc=leeLocal(o.matricula);
     if(loc&&loc.ronda!==o.ronda) loc=null;
     S={m:o.matricula,nombre:o.nombre,grupo:o.grupo,equipo:o.equipo,ronda:o.ronda,companeros:o.companeros||[],evals:o.evals||{},pend:[],enviado:!!o.enviado};
@@ -299,7 +337,7 @@ td.r,th.r{text-align:right}
     if(loc&&!S.enviado&&loc.evals){
       for(var m in loc.evals){
         var l=loc.evals[m], s=S.evals[m];
-        if(ids.indexOf(m)<0||!l||!l.d||l.d.length!==CATS.length) continue;
+        if(ids.indexOf(m)<0||!l||!l.d||l.d.length!==NC) continue;
         if(!s||(l.t||0)>(s.t||0)){ S.evals[m]=l; if(S.pend.indexOf(m)<0) S.pend.push(m); }
       }
     }
@@ -309,31 +347,32 @@ td.r,th.r{text-align:right}
 
   $("salir").addEventListener("click",function(){
     try{ localStorage.removeItem("coeq:yo"); }catch(e){}
-    S=null; $("mat").value=""; ver("vLogin");
+    S=null; $("mat").value=""; idioma("es"); ver("vLogin");
   });
 
   /* ---------- compañeros ---------- */
   function siguiente(){ for(var i=0;i<S.companeros.length;i++) if(!S.evals[S.companeros[i].m]) return S.companeros[i].m; return null; }
   function pintaMenu(){
     var c=S.companeros, n=hechos(), sig=siguiente();
-    $("hola").textContent="Hola, "+S.nombre;
-    $("miEq").textContent="Grupo "+S.grupo+" · "+S.equipo;
-    $("cuantos").textContent=n+" de "+c.length;
+    $("hola").textContent=t("hola")+S.nombre;
+    $("miEq").textContent=t("grupoEq",{g:S.grupo,e:eqNom(S.equipo)});
+    $("cuantos").textContent=t("de",{a:n,b:c.length});
     $("pbars").innerHTML=c.map(function(x){ return '<i class="'+(S.evals[x.m]?"on":"")+'"></i>'; }).join("");
-    $("menuSub").textContent=c.length&&n===c.length?"¡Ya evaluaste a todos! Revisa y envía.":"compañeros evaluados";
+    $("menuSub").textContent=c.length&&n===c.length?t("todos"):t("evaluados");
     $("mates").innerHTML=c.map(function(x,i){
       var e=S.evals[x.m], cls="mate", st, right;
       if(e){
         cls+=" hecho";
         st='<span class="mini" aria-hidden="true">'+e.d.map(function(v){ return '<i style="height:18px"><b style="height:'+Math.round((v-MIN)/(MAX-MIN)*100)+'%"></b></i>'; }).join("")+'</span>';
         right='<span class="sc num">'+f2(prom(e.d))+'<small>/4</small></span>';
-      }else if(x.m===sig){ cls+=" sigue"; st='<p class="st">Sigue · tócalo para evaluar</p>'; right='<span class="go">›</span>'; }
-      else { st='<p class="st">Pendiente</p>'; right='<span class="go">›</span>'; }
+      }else if(x.m===sig){ cls+=" sigue"; st='<p class="st">'+t("sigue")+'</p>'; right='<span class="go">›</span>'; }
+      else { st='<p class="st">'+t("pendiente")+'</p>'; right='<span class="go">›</span>'; }
       return '<button class="'+cls+'" data-m="'+esc(x.m)+'"><span class="n">'+(i+1)+'</span><span><p class="nm">'+esc(x.nombre)+'</p>'+st+'</span>'+right+'</button>';
     }).join("");
+    /* Solo se puede enviar cuando ya calificó a todos sus compañeros */
     var listo=c.length>0&&n===c.length;
     $("bEnviar").disabled=!listo; $("eEnviar").textContent="";
-    $("bEnviar").textContent=listo?"Enviar mis calificaciones":(c.length?"Te faltan "+(c.length-n):"No hay compañeros en tu equipo");
+    $("bEnviar").textContent=listo?t("enviar"):(c.length?t("faltan",{n:c.length-n}):t("sinComp"));
     ver("vMenu");
   }
   $("mates").addEventListener("click",function(ev){ var b=ev.target.closest("button[data-m]"); if(b) abreEval(b.getAttribute("data-m")); });
@@ -344,17 +383,17 @@ td.r,th.r{text-align:right}
     actual=m; avisado=false;
     var c=S.companeros.filter(function(x){ return x.m===m; })[0];
     var e=S.evals[m];
-    vals=e?e.d.slice():CATS.map(function(){ return MIN; });
-    tocado=CATS.map(function(){ return !!e; });
+    vals=e?e.d.slice():cats().map(function(){ return MIN; });
+    tocado=cats().map(function(){ return !!e; });
     $("evNm").textContent=c?c.nombre:"";
     $("eEval").textContent="";
-    $("cats").innerHTML=CATS.map(function(cat,i){
+    $("cats").innerHTML=cats().map(function(cat,i){
       var ticks=""; for(var k=MIN;k<=MAX;k++) ticks+='<span data-k="'+k+'">'+k+'</span>';
       return '<div class="cat" id="c'+i+'"><div class="hd"><div class="t"><h3>'+esc(cat)+'</h3><p id="d'+i+'"></p></div><span class="v" id="v'+i+'">1<small>/4</small></span></div>'+
         '<input type="range" min="'+MIN+'" max="'+MAX+'" step="1" value="'+vals[i]+'" data-i="'+i+'" aria-label="'+esc(cat)+'">'+
         '<div class="ticks">'+ticks+'</div><span class="tag" id="t'+i+'"></span></div>';
     }).join("");
-    for(var i=0;i<CATS.length;i++) pinta(i);
+    for(var i=0;i<NC;i++) pinta(i);
     ver("vEval");
   }
   function pinta(i){
@@ -362,8 +401,8 @@ td.r,th.r{text-align:right}
     $("v"+i).innerHTML=v+'<small>/4</small>';
     $("c"+i).classList.toggle("ok",tocado[i]);
     $("c"+i).classList.toggle("falta",avisado&&!tocado[i]);
-    $("t"+i).textContent=avisado&&!tocado[i]?"Sin mover":"";
-    $("d"+i).textContent=NIVELES[v]||"";
+    $("t"+i).textContent=avisado&&!tocado[i]?t("sinMover"):"";
+    $("d"+i).textContent=NIVELES[LANG][v]||"";
     r.style.setProperty("--trk","linear-gradient(90deg,var(--naranja) 0 "+pct+"%,var(--neutro) "+pct+"% 100%)");
     $("c"+i).querySelectorAll(".ticks span").forEach(function(s){ s.classList.toggle("on",+s.getAttribute("data-k")===v); });
   }
@@ -380,10 +419,10 @@ td.r,th.r{text-align:right}
     var i=+r.getAttribute("data-i"); r.value=v; vals[i]=v; tocado[i]=true; pinta(i);
   });
   $("bGuardar").addEventListener("click",function(){
-    var faltan=tocado.filter(function(t){ return !t; }).length;
+    var faltan=tocado.filter(function(x){ return !x; }).length;
     if(faltan&&!avisado){
-      avisado=true; for(var i=0;i<CATS.length;i++) pinta(i);
-      $("eEval").textContent=(faltan===1?"Te falta 1 categoría por mover":"Te faltan "+faltan+" categorías por mover")+". Si de verdad van en 1, toca Guardar otra vez.";
+      avisado=true; for(var i=0;i<NC;i++) pinta(i);
+      $("eEval").textContent=(faltan===1?t("falta1"):t("faltaN",{n:faltan}))+t("otraVez");
       $("c"+tocado.indexOf(false)).scrollIntoView({behavior:"smooth",block:"center"});
       return;
     }
@@ -391,7 +430,7 @@ td.r,th.r{text-align:right}
     if(S.pend.indexOf(actual)<0) S.pend.push(actual);
     guardaLocal();
     var c=S.companeros.filter(function(x){ return x.m===actual; })[0];
-    actual=null; pintaMenu(); toast("Guardado: "+(c?c.nombre:"")); flush();
+    actual=null; pintaMenu(); toast(t("guardado")+(c?c.nombre:"")); flush();
   });
   $("bBack").addEventListener("click",function(){ actual=null; pintaMenu(); });
 
@@ -416,36 +455,37 @@ td.r,th.r{text-align:right}
 
   function reinicio(){
     try{ localStorage.removeItem(key(S.m)); localStorage.removeItem("coeq:yo"); }catch(e){}
-    var m=S.m; S=null; actual=null; $("mat").value=m; ver("vLogin");
-    $("eLogin").textContent="El profe reinició la evaluación. Toca Entrar para empezar de nuevo.";
+    var m=S.m, msg=t("reinicio"); S=null; actual=null; $("mat").value=m; idioma("es"); ver("vLogin");
+    $("eLogin").textContent=msg;
   }
 
-  /* ---------- enviar todo ---------- */
+  /* ---------- enviar todo (solo con todos los compañeros calificados) ---------- */
   var armado=false;
   $("bEnviar").addEventListener("click",function(){
     var b=$("bEnviar");
-    if(!armado){ armado=true; b.textContent="¿Seguro? Ya no podrás cambiarlas. Toca otra vez";
-      setTimeout(function(){ if(armado&&S&&!S.enviado){ armado=false; if(!b.disabled) b.textContent="Enviar mis calificaciones"; } },5000); return; }
-    armado=false; b.disabled=true; b.textContent="Enviando…"; $("eEnviar").textContent="";
+    if(hechos()<S.companeros.length){ pintaMenu(); return; }
+    if(!armado){ armado=true; b.textContent=t("seguro");
+      setTimeout(function(){ if(armado&&S&&!S.enviado){ armado=false; if(!b.disabled) b.textContent=t("enviar"); } },5000); return; }
+    armado=false; b.disabled=true; b.textContent=t("enviando"); $("eEnviar").textContent="";
     var ev={}; S.companeros.forEach(function(x){ ev[x.m]=S.evals[x.m].d; });
     var intentos=0;
     function manda(){
       return api("submit",{matricula:S.m,evals:ev,ronda:S.ronda}).catch(function(e){
         if(++intentos>=4||/matrícula|Faltan|rango|RONDA|equipo/.test(e.message)) throw e;
-        b.textContent="Mucha gente enviando… reintento "+intentos;
+        b.textContent=t("reintento",{n:intentos});
         return new Promise(function(r){ setTimeout(r,2500+Math.random()*2500); }).then(manda);
       });
     }
     manda().then(function(){ S.enviado=true; S.pend=[]; guardaLocal(); pintaListo(); })
       .catch(function(e){
         if(/^RONDA/.test(e.message)) return reinicio();
-        $("eEnviar").textContent="No se pudo enviar ("+e.message+"). Revisa tu internet e intenta otra vez.";
-        b.disabled=false; b.textContent="Enviar mis calificaciones";
+        $("eEnviar").textContent=t("noEnvio",{e:errTxt(e.message)});
+        b.disabled=false; b.textContent=t("enviar");
       });
   });
 
   function pintaListo(){
-    $("listoSub").textContent="Gracias, "+S.nombre+". Tus calificaciones de "+S.companeros.length+" compañeros ya llegaron.";
+    $("listoSub").textContent=t("gracias",{n:S.nombre,k:S.companeros.length});
     $("listoT").innerHTML=S.companeros.map(function(x){ var e=S.evals[x.m]; return '<tr><td>'+esc(x.nombre)+'</td><td class="r num">'+(e?f2(prom(e.d)):"–")+'</td></tr>'; }).join("");
     ver("vListo");
   }
@@ -455,74 +495,82 @@ td.r,th.r{text-align:right}
   $("aProfe").addEventListener("click",function(){ $("fProfe").hidden=false; $("pGrupos").hidden=true; $("pGrupo").hidden=true; ver("vProfe"); $("pass").focus(); });
   $("bProfeBack").addEventListener("click",function(){
     if(!$("pGrupo").hidden){ clearInterval(tRef); grupo=null; pintaGrupos(); return; }
-    pass=""; $("pass").value=""; arranca();
+    pass=""; $("pass").value=""; idioma("es"); arranca();
   });
   $("fProfe").addEventListener("submit",function(ev){
     ev.preventDefault(); pass=$("pass").value; $("eProfe").textContent="";
-    carga().then(function(){ $("fProfe").hidden=true; pintaGrupos(); }).catch(function(e){ $("eProfe").textContent=e.message; });
+    carga().then(function(){ $("fProfe").hidden=true; pintaGrupos(); }).catch(function(e){ $("eProfe").textContent=/Contraseña/.test(e.message)?"Contraseña incorrecta · Wrong password":e.message; });
   });
-  function carga(){ return api("profe",{pass:pass}).then(function(o){ datos=o; if(o.cats) CATS=o.cats; return o; }); }
+  function carga(){ return api("profe",{pass:pass}).then(function(o){ datos=o; return o; }); }
   function grupos(){ var g=[]; datos.alumnos.forEach(function(a){ if(g.indexOf(a.grupo)<0) g.push(a.grupo); }); return g.sort(); }
   function pintaGrupos(){
+    idioma("es");
     $("pGrupo").hidden=true; $("pGrupos").hidden=false;
-    $("bProfeBack").textContent="‹ Salir del panel";
+    $("bProfeBack").textContent="‹ Salir del panel · Exit";
+    ver("vProfe");
     $("groups").innerHTML=grupos().map(function(g){
+      var en=langDe(g)==="en";
       var al=datos.alumnos.filter(function(a){ return a.grupo===g; });
       var env=al.filter(function(a){ return a.estado==="enviado"; }).length;
       var eq=[]; al.forEach(function(a){ if(eq.indexOf(a.equipo)<0) eq.push(a.equipo); });
-      return '<button class="gbtn" data-g="'+esc(g)+'"><span class="label">Grupo</span><span class="g">'+esc(g)+'</span><span class="s">'+al.length+' alumnos · '+eq.length+' equipos<br>'+env+' ya enviaron</span></button>';
+      var s=en?(al.length+" students · "+eq.length+" teams<br>"+env+" submitted"):(al.length+" alumnos · "+eq.length+" equipos<br>"+env+" ya enviaron");
+      return '<button class="gbtn" data-g="'+esc(g)+'"><span class="label">'+(en?"Group":"Grupo")+'</span><span class="g">'+esc(g)+'</span><span class="s">'+s+'</span></button>';
     }).join("");
   }
   $("groups").addEventListener("click",function(ev){ var b=ev.target.closest("button[data-g]"); if(!b) return; grupo=b.getAttribute("data-g"); pintaGrupo(); clearInterval(tRef); tRef=setInterval(function(){ carga().then(function(){ if(grupo) pintaGrupo(); }).catch(function(){}); },20000); });
   $("bOtro").addEventListener("click",function(){ clearInterval(tRef); grupo=null; pintaGrupos(); });
   function pintaGrupo(){
-    $("pGrupos").hidden=true; $("pGrupo").hidden=false; $("bProfeBack").textContent="‹ Grupos";
+    idioma(langDe(grupo));
+    $("pGrupos").hidden=true; $("pGrupo").hidden=false; $("bProfeBack").textContent=t("grupos");
+    ver("vProfe");
     var al=datos.alumnos.filter(function(a){ return a.grupo===grupo; });
-    $("gTit").textContent="Grupo "+grupo;
+    $("gTit").textContent=t("grupo")+" "+grupo;
     $("kEnv").textContent=al.filter(function(a){ return a.estado==="enviado"; }).length;
     $("kCur").textContent=al.filter(function(a){ return a.estado==="en curso"; }).length;
     $("kNo").textContent=al.filter(function(a){ return a.estado==="sin empezar"; }).length;
-    $("pAct").textContent="Se actualiza solo cada 20 segundos · "+new Date().toLocaleTimeString("es-MX",{hour:"numeric",minute:"2-digit"});
+    $("pAct").textContent=t("act")+new Date().toLocaleTimeString(LANG==="en"?"en-US":"es-MX",{hour:"numeric",minute:"2-digit"});
+    if(!armR) $("bReset").textContent=t("reset");
     var eqs=[]; al.forEach(function(a){ if(eqs.indexOf(a.equipo)<0) eqs.push(a.equipo); });
     eqs.sort(function(a,b){ return (parseInt(a.replace(/\D/g,""))||0)-(parseInt(b.replace(/\D/g,""))||0); });
     $("teams").innerHTML=eqs.map(function(eq){
       var m=al.filter(function(a){ return a.equipo===eq; });
-      return '<div class="team"><h3><span class="sq"></span>'+esc(eq)+'</h3><table><thead><tr><th>Integrante</th><th>Estatus</th><th class="r">Promedio</th></tr></thead><tbody>'+
+      var completo=m.every(function(a){ return a.estado==="enviado"; });
+      return '<div class="team"><h3><span class="sq"></span>'+esc(eqNom(eq))+(completo?"":WARN.replace(/\{a\}/g,esc(t("warn"))))+'</h3><table><thead><tr><th>'+t("integrante")+'</th><th>'+t("estatus")+'</th><th class="r">'+t("promedio")+'</th></tr></thead><tbody>'+
         m.map(function(a){
           var c=a.estado==="enviado"?"en":(a.estado==="en curso"?"cu":"");
-          var s=a.estado==="enviado"?"Envió":(a.estado==="en curso"?"Calificó "+a.hechas+" de "+a.porEvaluar:"Sin empezar");
-          return '<tr><td>'+esc(a.nombre)+'</td><td><span class="st2"><span class="dot '+c+'"></span>'+s+'</span></td><td class="r"><span class="avg num">'+(a.promedio==null?"–":f2(a.promedio))+'</span> <span class="st2">('+a.recibidas+')</span></td></tr>';
+          var s=a.estado==="enviado"?t("envio"):(a.estado==="en curso"?t("califico",{a:a.hechas,b:a.porEvaluar}):t("sinEmpezar"));
+          return '<tr><td>'+esc(a.nombre)+'</td><td><span class="st2"><span class="dot '+c+'"></span>'+s+'</span></td><td class="r"><span class="avg num">'+(a.promedio==null?"–":f2(a.promedio))+'</span></td></tr>';
         }).join("")+'</tbody></table></div>';
     }).join("");
   }
 
   function celda(v){ v=String(v==null?"":v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
   $("bCsv").addEventListener("click",function(){
-    var b=$("bCsv"); b.disabled=true; b.textContent="Preparando…";
+    var b=$("bCsv"); b.disabled=true; b.textContent=t("preparando");
     carga().then(function(){
       var al=datos.alumnos.filter(function(a){ return a.grupo===grupo; });
-      var head=["grupo","equipo","nombre","matricula","estatus","evaluaciones_recibidas"].concat(CATS,["promedio"]);
-      var rows=[head].concat(al.map(function(a){
-        return [a.grupo,a.equipo,a.nombre,a.matricula,a.estado,a.recibidas].concat(CATS.map(function(_,i){ return a.porCat?a.porCat[i]:""; }),[a.promedio==null?"":a.promedio]);
+      var st={"enviado":t("stEnv"),"en curso":t("stCur"),"sin empezar":t("stNo")};
+      var rows=[t("csvHead").concat(cats(),[t("csvProm")])].concat(al.map(function(a){
+        return [a.grupo,eqNom(a.equipo),a.nombre,a.matricula,st[a.estado]||a.estado,a.recibidas].concat(cats().map(function(_,i){ return a.porCat?a.porCat[i]:""; }),[a.promedio==null?"":a.promedio]);
       }));
       var csv="﻿"+rows.map(function(r){ return r.map(celda).join(","); }).join("\r\n");
       var url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
-      var a=document.createElement("a"); a.href=url; a.download="coevaluacion-equipo-grupo-"+grupo+"-"+new Date().toISOString().slice(0,10)+".csv";
+      var a=document.createElement("a"); a.href=url; a.download=(LANG==="en"?"team-peer-evaluation-group-":"coevaluacion-equipo-grupo-")+grupo+"-"+new Date().toISOString().slice(0,10)+".csv";
       document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(url); },2000);
-      toast("CSV descargado");
-    }).catch(function(e){ toast("No se pudo: "+e.message); })
-      .then(function(){ b.disabled=false; b.textContent="Exportar CSV"; });
+      toast(t("descargado"));
+    }).catch(function(e){ toast(t("noSePudo")+errTxt(e.message)); })
+      .then(function(){ b.disabled=false; b.textContent=t("csv"); });
   });
 
   var armR=false, tR=null;
   $("bReset").addEventListener("click",function(){
     var b=$("bReset");
-    if(!armR){ armR=true; b.classList.add("arm"); b.textContent="¿Seguro? Se borra todo el grupo "+grupo+". Toca otra vez";
-      clearTimeout(tR); tR=setTimeout(function(){ armR=false; b.classList.remove("arm"); b.textContent="Borrar las respuestas de este grupo"; },5000); return; }
-    armR=false; clearTimeout(tR); b.disabled=true; b.textContent="Borrando…";
-    api("reset",{pass:pass,grupo:grupo}).then(function(o){ datos=o; pintaGrupo(); toast("Grupo "+grupo+" en cero"); })
-      .catch(function(e){ toast("No se pudo: "+e.message); })
-      .then(function(){ b.disabled=false; b.classList.remove("arm"); b.textContent="Borrar las respuestas de este grupo"; });
+    if(!armR){ armR=true; b.classList.add("arm"); b.textContent=t("resetSeguro",{g:grupo});
+      clearTimeout(tR); tR=setTimeout(function(){ armR=false; b.classList.remove("arm"); b.textContent=t("reset"); },5000); return; }
+    armR=false; clearTimeout(tR); b.disabled=true; b.textContent=t("borrando");
+    api("reset",{pass:pass,grupo:grupo}).then(function(o){ datos=o; pintaGrupo(); toast(t("enCero",{g:grupo})); })
+      .catch(function(e){ toast(t("noSePudo")+errTxt(e.message)); })
+      .then(function(){ b.disabled=false; b.classList.remove("arm"); b.textContent=t("reset"); });
   });
 
   /* ---------- arranque ---------- */
@@ -531,10 +579,12 @@ td.r,th.r{text-align:right}
     var loc=m?leeLocal(m):null;
     if(loc&&loc.m&&loc.companeros){
       S=loc; if(!S.pend) S.pend=[];
+      idioma(langDe(S.grupo));
       if(S.enviado) pintaListo(); else pintaMenu();
       api("login",{matricula:S.m}).then(function(o){ if(S&&S.m===o.matricula&&(!actual||S.ronda!==o.ronda)) aplicaServidor(o); }).catch(function(){});
-    }else ver("vLogin");
+    }else { idioma("es"); ver("vLogin"); }
   }
+  idioma("es");
   if(location.hash==="#profe"){ ver("vProfe"); } else arranca();
 })();
 </script>
