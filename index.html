@@ -128,8 +128,11 @@ td.r,th.r{text-align:right}
 .kp span{font-size:13px;color:var(--gris)}
 .kp div.or{border-top-color:var(--naranja)}
 .team{display:flex;flex-direction:column;gap:6px}
-.team h3{font-family:var(--serif);font-size:24px;font-weight:500;display:flex;align-items:center;gap:10px}
+.team h3{font-family:var(--serif);font-size:24px;font-weight:500;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .warn{display:inline-flex;flex:none}
+.wlegend{font-family:var(--sans);font-size:12px;font-weight:500;line-height:1.25;color:var(--gris);flex:1 1 140px;min-width:0}
+.ghead{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.btn.sm{width:auto;flex:none;padding:10px 14px;font-size:13px;letter-spacing:1.5px}
 .dot{display:inline-block;width:10px;height:10px;background:var(--neutro);margin-right:6px;vertical-align:middle}
 .dot.en{background:var(--verde)}
 .dot.cu{background:var(--naranja)}
@@ -212,13 +215,13 @@ td.r,th.r{text-align:right}
       <div class="groups" id="groups"></div>
     </div>
     <div id="pGrupo" hidden style="display:flex;flex-direction:column;gap:20px">
-      <h1 class="title" id="gTit"></h1>
+      <div class="ghead"><h1 class="title" id="gTit"></h1><button class="btn line sm" id="bOtro" data-i18n="otro"></button></div>
       <div class="kp">
         <div class="or"><b class="num" id="kEnv">0</b><span data-i18n="kEnv"></span></div>
         <div><b class="num" id="kCur">0</b><span data-i18n="kCur"></span></div>
         <div><b class="num" id="kNo">0</b><span data-i18n="kNo"></span></div>
       </div>
-      <div class="actions"><button class="btn or" id="bCsv" data-i18n="csv"></button><button class="btn line" id="bOtro" data-i18n="otro"></button></div>
+      <div class="actions"><button class="btn or" id="bCsv" data-i18n="csv"></button><button class="btn or" id="bXlsx" data-i18n="xlsx"></button></div>
       <p class="hint" id="pAct"></p>
       <div id="teams" style="display:flex;flex-direction:column;gap:26px"></div>
       <p class="hint" data-i18n="nota"></p>
@@ -251,7 +254,8 @@ td.r,th.r{text-align:right}
       reinicio:"El profe reinició la evaluación. Toca Entrar para empezar de nuevo.",equipo:"Equipo",grupo:"Grupo",
       kEnv:"enviaron",kCur:"van a medias",kNo:"sin empezar",csv:"Exportar CSV",otro:"Cambiar grupo",grupos:"‹ Grupos",act:"Se actualiza solo cada 20 segundos · ",
       integrante:"Integrante",estatus:"Estatus",promedio:"Promedio",envio:"Envió",califico:"Calificó {a} de {b}",sinEmpezar:"Sin empezar",
-      warn:"Aún faltan integrantes por enviar",nota:"Promedio = lo que le dieron sus compañeros de equipo (1 a 4), contando solo las evaluaciones enviadas. ⚠ = aún faltan integrantes por enviar.",
+      warn:"Aún faltan integrantes por enviar",wleg:"Equipo todavía no envía las coevaluaciones completas",xlsx:"Exportar XLSX",hoja:"Grupo {g}",
+      nota:"Promedio = lo que le dieron sus compañeros de equipo (1 a 4), contando solo las evaluaciones enviadas.",
       reset:"Borrar las respuestas de este grupo",resetSeguro:"¿Seguro? Se borra todo el grupo {g}. Toca otra vez",borrando:"Borrando…",enCero:"Grupo {g} en cero",
       preparando:"Preparando…",descargado:"CSV descargado",noSePudo:"No se pudo: ",foot:"Innovación con enfoque de mercado",
       csvHead:["grupo","equipo","nombre","matricula","estatus","evaluaciones_recibidas"],csvProm:"promedio",stEnv:"enviado",stCur:"en curso",stNo:"sin empezar"},
@@ -265,7 +269,8 @@ td.r,th.r{text-align:right}
       reinicio:"The teacher restarted the evaluation. Tap Enter to start again.",equipo:"Team",grupo:"Group",
       kEnv:"submitted",kCur:"in progress",kNo:"not started",csv:"Export CSV",otro:"Change group",grupos:"‹ Groups",act:"Updates every 20 seconds · ",
       integrante:"Member",estatus:"Status",promedio:"Average",envio:"Submitted",califico:"Rated {a} of {b}",sinEmpezar:"Not started",
-      warn:"Some members haven’t submitted yet",nota:"Average = what their teammates gave them (1 to 4), counting only submitted evaluations. ⚠ = some members haven’t submitted yet.",
+      warn:"Some members haven’t submitted yet",wleg:"Team hasn’t submitted all peer evaluations yet",xlsx:"Export XLSX",hoja:"Group {g}",
+      nota:"Average = what their teammates gave them (1 to 4), counting only submitted evaluations.",
       reset:"Delete this group’s responses",resetSeguro:"Sure? All of group {g} will be deleted. Tap again",borrando:"Deleting…",enCero:"Group {g} reset",
       preparando:"Preparing…",descargado:"CSV downloaded",noSePudo:"Couldn’t do it: ",foot:"Market-based Innovation",
       csvHead:["group","team","name","student_id","status","ratings_received"],csvProm:"average",stEnv:"submitted",stCur:"in progress",stNo:"not started"}
@@ -535,7 +540,7 @@ td.r,th.r{text-align:right}
     $("teams").innerHTML=eqs.map(function(eq){
       var m=al.filter(function(a){ return a.equipo===eq; });
       var completo=m.every(function(a){ return a.estado==="enviado"; });
-      return '<div class="team"><h3><span class="sq"></span>'+esc(eqNom(eq))+(completo?"":WARN.replace(/\{a\}/g,esc(t("warn"))))+'</h3><table><thead><tr><th>'+t("integrante")+'</th><th>'+t("estatus")+'</th><th class="r">'+t("promedio")+'</th></tr></thead><tbody>'+
+      return '<div class="team"><h3><span class="sq"></span>'+esc(eqNom(eq))+(completo?"":WARN.replace(/\{a\}/g,esc(t("warn")))+'<span class="wlegend">'+esc(t("wleg"))+'</span>')+'</h3><table><thead><tr><th>'+t("integrante")+'</th><th>'+t("estatus")+'</th><th class="r">'+t("promedio")+'</th></tr></thead><tbody>'+
         m.map(function(a){
           var c=a.estado==="enviado"?"en":(a.estado==="en curso"?"cu":"");
           var s=a.estado==="enviado"?t("envio"):(a.estado==="en curso"?t("califico",{a:a.hechas,b:a.porEvaluar}):t("sinEmpezar"));
@@ -545,21 +550,52 @@ td.r,th.r{text-align:right}
   }
 
   function celda(v){ v=String(v==null?"":v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+  /* Las mismas filas para CSV y XLSX; los números van como números */
+  function filasExport(){
+    var al=datos.alumnos.filter(function(a){ return a.grupo===grupo; });
+    var st={"enviado":t("stEnv"),"en curso":t("stCur"),"sin empezar":t("stNo")};
+    return [t("csvHead").concat(cats(),[t("csvProm")])].concat(al.map(function(a){
+      return [a.grupo,eqNom(a.equipo),a.nombre,a.matricula,st[a.estado]||a.estado,a.recibidas].concat(cats().map(function(_,i){ return a.porCat?a.porCat[i]:""; }),[a.promedio==null?"":a.promedio]);
+    }));
+  }
+  function nombreArchivo(ext){ return (LANG==="en"?"team-peer-evaluation-group-":"coevaluacion-equipo-grupo-")+grupo+"-"+new Date().toISOString().slice(0,10)+"."+ext; }
+  function bajar(blob,nombre){
+    var url=URL.createObjectURL(blob), a=document.createElement("a"); a.href=url; a.download=nombre;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(url); },2000);
+  }
   $("bCsv").addEventListener("click",function(){
     var b=$("bCsv"); b.disabled=true; b.textContent=t("preparando");
     carga().then(function(){
-      var al=datos.alumnos.filter(function(a){ return a.grupo===grupo; });
-      var st={"enviado":t("stEnv"),"en curso":t("stCur"),"sin empezar":t("stNo")};
-      var rows=[t("csvHead").concat(cats(),[t("csvProm")])].concat(al.map(function(a){
-        return [a.grupo,eqNom(a.equipo),a.nombre,a.matricula,st[a.estado]||a.estado,a.recibidas].concat(cats().map(function(_,i){ return a.porCat?a.porCat[i]:""; }),[a.promedio==null?"":a.promedio]);
-      }));
-      var csv="﻿"+rows.map(function(r){ return r.map(celda).join(","); }).join("\r\n");
-      var url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
-      var a=document.createElement("a"); a.href=url; a.download=(LANG==="en"?"team-peer-evaluation-group-":"coevaluacion-equipo-grupo-")+grupo+"-"+new Date().toISOString().slice(0,10)+".csv";
-      document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(url); },2000);
+      var csv="﻿"+filasExport().map(function(r){ return r.map(celda).join(","); }).join("\r\n");
+      bajar(new Blob([csv],{type:"text/csv;charset=utf-8"}),nombreArchivo("csv"));
       toast(t("descargado"));
     }).catch(function(e){ toast(t("noSePudo")+errTxt(e.message)); })
       .then(function(){ b.disabled=false; b.textContent=t("csv"); });
+  });
+  /* XLSX: la librería SheetJS se carga solo cuando se pide */
+  var xlsxLib=null;
+  function cargaXlsx(){
+    if(window.XLSX) return Promise.resolve(window.XLSX);
+    if(xlsxLib) return xlsxLib;
+    xlsxLib=new Promise(function(res,rej){
+      var s=document.createElement("script"); s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+      s.onload=function(){ res(window.XLSX); }; s.onerror=function(){ xlsxLib=null; rej(new Error("XLSX")); };
+      document.head.appendChild(s);
+    });
+    return xlsxLib;
+  }
+  $("bXlsx").addEventListener("click",function(){
+    var b=$("bXlsx"); b.disabled=true; b.textContent=t("preparando");
+    Promise.all([carga(),cargaXlsx()]).then(function(r){
+      var X=r[1], rows=filasExport();
+      var ws=X.utils.aoa_to_sheet(rows);
+      ws["!cols"]=rows[0].map(function(h,i){ var w=String(h).length; rows.forEach(function(f){ w=Math.max(w,String(f[i]==null?"":f[i]).length); }); return {wch:Math.min(w+2,42)}; });
+      var wb=X.utils.book_new(); X.utils.book_append_sheet(wb,ws,t("hoja",{g:grupo}));
+      var out=X.write(wb,{bookType:"xlsx",type:"array"});
+      bajar(new Blob([out],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),nombreArchivo("xlsx"));
+      toast(LANG==="en"?"XLSX downloaded":"XLSX descargado");
+    }).catch(function(e){ toast(t("noSePudo")+errTxt(e.message)); })
+      .then(function(){ b.disabled=false; b.textContent=t("xlsx"); });
   });
 
   var armR=false, tR=null;
