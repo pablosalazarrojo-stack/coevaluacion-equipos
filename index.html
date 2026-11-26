@@ -606,7 +606,7 @@ td.r,th.r{text-align:right}
   }
   function carga(){ return api("profe",{pass:pass}).then(function(o){ datos=o; return o; }); }
   function grupos(){ var g=[]; datos.alumnos.forEach(function(a){ if(g.indexOf(a.grupo)<0) g.push(a.grupo); }); return g.sort(); }
-  var campSel=(function(){ try{ var v=JSON.parse(sessionStorage.getItem("coeq:camp")||"[]"); return Array.isArray(v)?v:[]; }catch(e){ return []; } })();
+  var campSel=[]; /* un solo campus a la vez; al entrar, ninguno (se ven todos) */
   function campusDe(g){ var p=String(g).split(" "); return p.length>1?p[0]:""; }
   function pintaGrupos(){
     idioma("es");
@@ -633,8 +633,7 @@ td.r,th.r{text-align:right}
   $("campf").addEventListener("click",function(ev){
     var b=ev.target.closest("button[data-c]"); if(!b) return;
     var c=b.getAttribute("data-c"), i=campSel.indexOf(c);
-    if(i>=0) campSel.splice(i,1); else campSel.push(c);
-    try{ sessionStorage.setItem("coeq:camp",JSON.stringify(campSel)); }catch(e){}
+    campSel=i>=0?[]:[c];
     pintaGrupos();
   });
   $("groups").addEventListener("click",function(ev){ var b=ev.target.closest("button[data-g]"); if(b) abreGrupo(b.getAttribute("data-g")); });
