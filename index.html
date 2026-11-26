@@ -317,7 +317,7 @@ td.r,th.r{text-align:right}
       reset:"Borrar las respuestas de este grupo",resetSeguro:"¿Seguro? Se borra todo el grupo {g}. Toca otra vez",borrando:"Borrando…",enCero:"Grupo {g} en cero",
       preparando:"Preparando…",descargado:"CSV descargado",noSePudo:"No se pudo: ",foot:"Innovación con enfoque de mercado",
       jala:"↓ Jala para actualizar",suelta:"↑ Suelta para actualizar",actualizando:"Actualizando…",actualizado:"Actualizado",
-      csvHead:["grupo","equipo","nombre","matricula","estatus","evaluaciones_recibidas"],csvProm:"promedio",stEnv:"enviado",stCur:"en curso",stNo:"sin empezar",
+      csvHead:["grupo","equipo","nombre","matricula","estatus","evaluaciones_recibidas"],csvProm:"promedio",csvB100:"base_100",stEnv:"enviado",stCur:"en curso",stNo:"sin empezar",
       antes:"Antes de empezar",escalaT:"Cómo calificar",deAcuerdo:"De acuerdo",
       introTxt:"Durante estas 10 semanas cada integrante de tu equipo aportó algo distinto, y ahora te toca reconocerlo. Tu calificación refleja el impacto que tuvo cada compañero en los resultados. Te pido que revises cada rubro con honestidad: si calificas igual a todos, le quitas valor al esfuerzo de quien más se comprometió. Confío en tu criterio.",
       pasos:["Completa la coevaluación para tu equipo.","Califica a cada uno de tus compañeros de equipo.","Reflexiona sobre el desempeño realizado en esta materia.","Asigna a cada uno una calificación del 1 al 4."]},
@@ -336,7 +336,7 @@ td.r,th.r{text-align:right}
       reset:"Delete this group’s responses",resetSeguro:"Sure? All of group {g} will be deleted. Tap again",borrando:"Deleting…",enCero:"Group {g} reset",
       preparando:"Preparing…",descargado:"CSV downloaded",noSePudo:"Couldn’t do it: ",foot:"Market-based Innovation",
       jala:"↓ Pull to refresh",suelta:"↑ Release to refresh",actualizando:"Refreshing…",actualizado:"Up to date",
-      csvHead:["group","team","name","student_id","status","ratings_received"],csvProm:"average",stEnv:"submitted",stCur:"in progress",stNo:"not started",
+      csvHead:["group","team","name","student_id","status","ratings_received"],csvProm:"average",csvB100:"score_100",stEnv:"submitted",stCur:"in progress",stNo:"not started",
       antes:"Before you start",escalaT:"Rating scale",deAcuerdo:"I agree",
       introTxt:"Over these 10 weeks, each member of your team contributed something different, and now it’s your turn to recognize it. Your rating reflects the impact each teammate had on the results. Please review each criterion honestly: if you give everyone the same rating, you take value away from the effort of whoever committed the most. I trust your judgment.",
       pasos:["Complete the peer evaluation for your team.","Rate each of your teammates.","Reflect on the work done in this course.","Give each one a rating from 1 to 4."]}
@@ -665,12 +665,12 @@ td.r,th.r{text-align:right}
   }
 
   function celda(v){ v=String(v==null?"":v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
-  /* Las mismas filas para CSV y XLSX; los números van como números */
+  /* Las mismas filas para CSV y XLSX; los números van como números. base_100 = promedio / 4 × 100 */
   function filasExport(){
     var al=datos.alumnos.filter(function(a){ return a.grupo===grupo; });
     var st={"enviado":t("stEnv"),"en curso":t("stCur"),"sin empezar":t("stNo")};
-    return [t("csvHead").concat(cats(),[t("csvProm")])].concat(al.map(function(a){
-      return [a.grupo,eqNom(a.equipo),a.nombre,a.matricula,st[a.estado]||a.estado,a.recibidas].concat(cats().map(function(_,i){ return a.porCat?a.porCat[i]:""; }),[a.promedio==null?"":a.promedio]);
+    return [t("csvHead").concat(cats(),[t("csvProm"),t("csvB100")])].concat(al.map(function(a){
+      return [a.grupo,eqNom(a.equipo),a.nombre,a.matricula,st[a.estado]||a.estado,a.recibidas].concat(cats().map(function(_,i){ return a.porCat?a.porCat[i]:""; }),[a.promedio==null?"":a.promedio,a.promedio==null?"":Math.round(a.promedio/4*10000)/100]);
     }));
   }
   function nombreArchivo(ext){ return (LANG==="en"?"team-peer-evaluation-group-":"coevaluacion-equipo-grupo-")+String(grupo).replace(/\s+/g,"-")+"-"+new Date().toISOString().slice(0,10)+"."+ext; }
