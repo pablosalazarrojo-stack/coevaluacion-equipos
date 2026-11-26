@@ -139,6 +139,11 @@ td.r,th.r{text-align:right}
 
 /* profe */
 .groups{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ghead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px 16px;flex-wrap:wrap}
+.campf{display:flex;gap:6px;flex-wrap:wrap}
+.campf button{border:2px solid var(--tinta);background:transparent;color:var(--tinta);padding:6px 12px;min-width:58px;font-family:var(--cond);font-size:20px;font-weight:700;letter-spacing:1px}
+.campf button:hover{border-color:var(--naranja)}
+.campf button[aria-pressed="true"]{background:var(--tinta);color:var(--crema);border-color:var(--tinta)}
 .gbtn{border:none;border-top:4px solid var(--tinta);background:var(--papel);padding:18px 16px;text-align:left;display:flex;flex-direction:column;gap:6px}
 .gbtn:hover{border-top-color:var(--naranja)}
 .gbtn .g{font-family:var(--cond);font-size:54px;font-weight:800;line-height:.9;display:flex;align-items:baseline;gap:8px}
@@ -248,7 +253,10 @@ td.r,th.r{text-align:right}
       <button class="btn">Entrar · Enter</button>
     </form>
     <div id="pGrupos" hidden style="display:flex;flex-direction:column;gap:18px">
-      <h1 class="title">Elige tu grupo<br><span style="color:var(--gris);font-size:.6em;font-style:italic">Choose your group</span></h1>
+      <div class="ghead">
+        <h1 class="title">Elige tu grupo<br><span style="color:var(--gris);font-size:.6em;font-style:italic">Choose your group</span></h1>
+        <div class="campf" id="campf" role="group" aria-label="Filtrar por campus · Filter by campus"></div>
+      </div>
       <div class="groups" id="groups"></div>
     </div>
     <div id="pGrupo" hidden style="display:flex;flex-direction:column;gap:20px">
@@ -598,13 +606,21 @@ td.r,th.r{text-align:right}
   }
   function carga(){ return api("profe",{pass:pass}).then(function(o){ datos=o; return o; }); }
   function grupos(){ var g=[]; datos.alumnos.forEach(function(a){ if(g.indexOf(a.grupo)<0) g.push(a.grupo); }); return g.sort(); }
+  var campSel=(function(){ try{ var v=JSON.parse(sessionStorage.getItem("coeq:camp")||"[]"); return Array.isArray(v)?v:[]; }catch(e){ return []; } })();
+  function campusDe(g){ var p=String(g).split(" "); return p.length>1?p[0]:""; }
   function pintaGrupos(){
     idioma("es");
+    var todos=grupos(), camps=[];
+    todos.forEach(function(g){ var c=campusDe(g); if(c&&camps.indexOf(c)<0) camps.push(c); });
+    camps.sort();
+    campSel=campSel.filter(function(c){ return camps.indexOf(c)>=0; });
+    $("campf").innerHTML=camps.map(function(c){ return '<button type="button" data-c="'+esc(c)+'" aria-pressed="'+(campSel.indexOf(c)>=0)+'">'+esc(c)+'</button>'; }).join("");
+    var lista=campSel.length?todos.filter(function(g){ return campSel.indexOf(campusDe(g))>=0; }):todos;
     $("pGrupo").hidden=true; $("pGrupos").hidden=false;
     $("bProfeBack").textContent="‹ Salir del panel · Exit";
     marca("#profe");
     ver("vProfe");
-    $("groups").innerHTML=grupos().map(function(g){
+    $("groups").innerHTML=lista.map(function(g){
       var en=langDe(g)==="en";
       var al=datos.alumnos.filter(function(a){ return a.grupo===g; });
       var env=al.filter(function(a){ return a.estado==="enviado"; }).length;
@@ -614,6 +630,13 @@ td.r,th.r{text-align:right}
       return '<button class="gbtn" data-g="'+esc(g)+'"><span class="label">'+(en?"Group":"Grupo")+(en?" · English":"")+'</span><span class="g">'+(camp?'<small>'+esc(camp)+'</small>':'')+esc(num)+'</span><span class="s">'+s+'</span></button>';
     }).join("");
   }
+  $("campf").addEventListener("click",function(ev){
+    var b=ev.target.closest("button[data-c]"); if(!b) return;
+    var c=b.getAttribute("data-c"), i=campSel.indexOf(c);
+    if(i>=0) campSel.splice(i,1); else campSel.push(c);
+    try{ sessionStorage.setItem("coeq:camp",JSON.stringify(campSel)); }catch(e){}
+    pintaGrupos();
+  });
   $("groups").addEventListener("click",function(ev){ var b=ev.target.closest("button[data-g]"); if(b) abreGrupo(b.getAttribute("data-g")); });
   $("bOtro").addEventListener("click",function(){ clearInterval(tRef); grupo=null; pintaGrupos(); });
   function pintaGrupo(){
