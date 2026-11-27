@@ -317,7 +317,7 @@ td.r,th.r{text-align:right}
       reset:"Borrar las respuestas de este grupo",resetSeguro:"¿Seguro? Se borra todo el grupo {g}. Toca otra vez",borrando:"Borrando…",enCero:"Grupo {g} en cero",
       preparando:"Preparando…",descargado:"CSV descargado",noSePudo:"No se pudo: ",foot:"Innovación con enfoque de mercado",
       jala:"↓ Jala para actualizar",suelta:"↑ Suelta para actualizar",actualizando:"Actualizando…",actualizado:"Actualizado",
-      csvHead:["grupo","equipo","nombre","matricula","estatus","evaluaciones_recibidas"],csvProm:"promedio",csvB100:"porcentaje",stEnv:"enviado",stCur:"en curso",stNo:"sin empezar",
+      csvHead:["grupo","equipo","nombre","matricula","estatus","evaluaciones_recibidas"],csvProm:"promedio",csvB100:"porcentaje",csvEcual:"factor_final_ecualizado",stEnv:"enviado",stCur:"en curso",stNo:"sin empezar",
       antes:"Antes de empezar",escalaT:"Cómo calificar",deAcuerdo:"De acuerdo",
       introTxt:"Durante estas 10 semanas cada integrante de tu equipo aportó algo distinto, y ahora te toca reconocerlo. Tu calificación refleja el impacto que tuvo cada compañero en los resultados. Te pido que revises cada rubro con honestidad: si calificas igual a todos, le quitas valor al esfuerzo de quien más se comprometió. Confío en tu criterio.",
       pasos:["Completa la coevaluación para tu equipo.","Califica a cada uno de tus compañeros de equipo.","Reflexiona sobre el desempeño realizado en esta materia.","Asigna a cada uno una calificación del 1 al 4."]},
@@ -336,7 +336,7 @@ td.r,th.r{text-align:right}
       reset:"Delete this group’s responses",resetSeguro:"Sure? All of group {g} will be deleted. Tap again",borrando:"Deleting…",enCero:"Group {g} reset",
       preparando:"Preparing…",descargado:"CSV downloaded",noSePudo:"Couldn’t do it: ",foot:"Market-based Innovation",
       jala:"↓ Pull to refresh",suelta:"↑ Release to refresh",actualizando:"Refreshing…",actualizado:"Up to date",
-      csvHead:["group","team","name","student_id","status","ratings_received"],csvProm:"average",csvB100:"percent",stEnv:"submitted",stCur:"in progress",stNo:"not started",
+      csvHead:["group","team","name","student_id","status","ratings_received"],csvProm:"average",csvB100:"percent",csvEcual:"equalized_final_score",stEnv:"submitted",stCur:"in progress",stNo:"not started",
       antes:"Before you start",escalaT:"Rating scale",deAcuerdo:"I agree",
       introTxt:"Over these 10 weeks, each member of your team contributed something different, and now it’s your turn to recognize it. Your rating reflects the impact each teammate had on the results. Please review each criterion honestly: if you give everyone the same rating, you take value away from the effort of whoever committed the most. I trust your judgment.",
       pasos:["Complete the peer evaluation for your team.","Rate each of your teammates.","Reflect on the work done in this course.","Give each one a rating from 1 to 4."]}
@@ -665,12 +665,13 @@ td.r,th.r{text-align:right}
   }
 
   function celda(v){ v=String(v==null?"":v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
-  /* Las mismas filas para CSV y XLSX; los números van como números. porcentaje = promedio / 4 (en CSV como «85%», en XLSX con formato de %) */
+  /* Las mismas filas para CSV y XLSX; los números van como números. porcentaje = promedio / 4 (en CSV como «85%», en XLSX con formato de %).
+     factor_final_ecualizado = promedio de las calificaciones recibidas con 4=100, 3=85, 2=70, 1=50 (lo calcula el servidor) */
   function filasExport(){
     var al=datos.alumnos.filter(function(a){ return a.grupo===grupo; });
     var st={"enviado":t("stEnv"),"en curso":t("stCur"),"sin empezar":t("stNo")};
-    return [t("csvHead").concat(cats(),[t("csvProm"),t("csvB100")])].concat(al.map(function(a){
-      return [a.grupo,eqNom(a.equipo),a.nombre,a.matricula,st[a.estado]||a.estado,a.recibidas].concat(cats().map(function(_,i){ return a.porCat?a.porCat[i]:""; }),[a.promedio==null?"":a.promedio,a.promedio==null?"":Math.round(a.promedio/4*10000)/10000]);
+    return [t("csvHead").concat(cats(),[t("csvProm"),t("csvB100"),t("csvEcual")])].concat(al.map(function(a){
+      return [a.grupo,eqNom(a.equipo),a.nombre,a.matricula,st[a.estado]||a.estado,a.recibidas].concat(cats().map(function(_,i){ return a.porCat?a.porCat[i]:""; }),[a.promedio==null?"":a.promedio,a.promedio==null?"":Math.round(a.promedio/4*10000)/10000,a.ecual==null?"":a.ecual]);
     }));
   }
   function nombreArchivo(ext){ return (LANG==="en"?"team-peer-evaluation-group-":"coevaluacion-equipo-grupo-")+String(grupo).replace(/\s+/g,"-")+"-"+new Date().toISOString().slice(0,10)+"."+ext; }
@@ -681,7 +682,7 @@ td.r,th.r{text-align:right}
   $("bCsv").addEventListener("click",function(){
     var b=$("bCsv"); b.disabled=true; b.textContent=t("preparando");
     carga().then(function(){
-      var csv="﻿"+filasExport().map(function(r,k){ return r.map(function(v,i){ return (k>0&&i===r.length-1&&v!=="")?celda(Math.round(v*1000)/10+"%"):celda(v); }).join(","); }).join("\r\n");
+      var csv="﻿"+filasExport().map(function(r,k){ return r.map(function(v,i){ return (k>0&&i===r.length-2&&v!=="")?celda(Math.round(v*1000)/10+"%"):celda(v); }).join(","); }).join("\r\n");
       bajar(new Blob([csv],{type:"text/csv;charset=utf-8"}),nombreArchivo("csv"));
       toast(t("descargado"));
     }).catch(function(e){ toast(t("noSePudo")+errTxt(e.message)); })
@@ -703,8 +704,9 @@ td.r,th.r{text-align:right}
     var b=$("bXlsx"); b.disabled=true; b.textContent=t("preparando");
     Promise.all([carga(),cargaXlsx()]).then(function(r){
       var X=r[1], rows=filasExport();
-      var ws=X.utils.aoa_to_sheet(rows), pc=rows[0].length-1;
-      for(var k=1;k<rows.length;k++){ var ref=X.utils.encode_cell({r:k,c:pc}); if(ws[ref]&&typeof ws[ref].v==="number") ws[ref].z="0.0%"; }
+      var ws=X.utils.aoa_to_sheet(rows), pc=rows[0].length-2;
+      for(var k=1;k<rows.length;k++){ var ref=X.utils.encode_cell({r:k,c:pc}); if(ws[ref]&&typeof ws[ref].v==="number") ws[ref].z="0.0%";
+        var ref2=X.utils.encode_cell({r:k,c:pc+1}); if(ws[ref2]&&typeof ws[ref2].v==="number") ws[ref2].z="0.0"; }
       ws["!cols"]=rows[0].map(function(h,i){ var w=String(h).length; rows.forEach(function(f){ w=Math.max(w,String(f[i]==null?"":f[i]).length); }); return {wch:Math.min(w+2,42)}; });
       var wb=X.utils.book_new(); X.utils.book_append_sheet(wb,ws,t("hoja",{g:grupo}));
       var out=X.write(wb,{bookType:"xlsx",type:"array"});

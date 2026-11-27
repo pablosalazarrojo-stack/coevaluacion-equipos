@@ -215,6 +215,9 @@ function reiniciar(grupo) {
   }
 }
 
+/* Final ecualizado: cada 4 vale 100, cada 3 vale 85, cada 2 vale 70 y cada 1 vale 50; se promedian */
+const ECUAL = { 4: 100, 3: 85, 2: 70, 1: 50 };
+
 function tablero() {
   const rows = filas();
   const al = alumnos();
@@ -224,9 +227,9 @@ function tablero() {
     hechas[de] = (hechas[de] || 0) + 1;
     if (r[I_EST] === "enviado") {
       env[de] = true;
-      const t = recib[a] = recib[a] || { n: 0, s: CATS.map(function () { return 0; }) };
+      const t = recib[a] = recib[a] || { n: 0, e: 0, s: CATS.map(function () { return 0; }) };
       t.n++;
-      for (let i = 0; i < NC; i++) t.s[i] += Number(r[I_C + i]) || 0;
+      for (let i = 0; i < NC; i++) { const c = Number(r[I_C + i]) || 0; t.s[i] += c; t.e += ECUAL[c] || 0; }
     }
   });
   const tam = {};
@@ -243,6 +246,7 @@ function tablero() {
         porEvaluar: tam[x.g + "|" + x.e] - 1,
         recibidas: r ? r.n : 0,
         porCat: porCat,
+        ecual: r ? Math.round(r.e / (r.n * NC) * 100) / 100 : null,
         promedio: r ? Math.round(r.s.reduce(function (s, v) { return s + v; }, 0) / (r.n * NC) * 100) / 100 : null
       };
     })
