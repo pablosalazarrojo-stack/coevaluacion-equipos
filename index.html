@@ -164,6 +164,7 @@ td.r,th.r{text-align:right}
 .dot.en{background:var(--verde)}
 .dot.cu{background:var(--naranja)}
 .st2{font-size:13px;color:var(--gris);white-space:nowrap}
+@media (max-width:520px){.team th,.team td{padding:8px 4px}.team thead th{font-size:10px;letter-spacing:.5px}.team .avg{font-size:17px}.team .st2{white-space:normal;font-size:12px}}
 .avg{font-family:var(--serif);font-size:20px;font-weight:500}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .actions .btn{font-size:15px;letter-spacing:1.5px}
@@ -313,7 +314,7 @@ td.r,th.r{text-align:right}
       kEnv:"enviaron",kCur:"van a medias",kNo:"sin empezar",csv:"Exportar CSV",otro:"Cambiar grupo",grupos:"‹ Grupos",act:"Se actualiza solo cada 20 segundos · ",
       integrante:"Integrante",estatus:"Estatus",promedio:"Promedio",envio:"Envió",califico:"Calificó {a} de {b}",sinEmpezar:"Sin empezar",
       warn:"Aún faltan integrantes por enviar",wleg:"Equipo todavía no envía las coevaluaciones completas",xlsx:"Exportar XLSX",hoja:"Grupo {g}",
-      nota:"Promedio = lo que le dieron sus compañeros de equipo (1 a 4), contando solo las evaluaciones enviadas.",
+      nota:"Promedio = lo que le dieron sus compañeros de equipo (1 a 4), contando solo las evaluaciones enviadas. Final ecualizado = cada 4 vale 100%, cada 3 vale 85%, cada 2 vale 70% y cada 1 vale 50%, promediados.",ecualTh:"Final ecualizado",
       reset:"Borrar las respuestas de este grupo",resetSeguro:"¿Seguro? Se borra todo el grupo {g}. Toca otra vez",borrando:"Borrando…",enCero:"Grupo {g} en cero",
       preparando:"Preparando…",descargado:"CSV descargado",noSePudo:"No se pudo: ",foot:"Innovación con enfoque de mercado",
       jala:"↓ Jala para actualizar",suelta:"↑ Suelta para actualizar",actualizando:"Actualizando…",actualizado:"Actualizado",
@@ -332,7 +333,7 @@ td.r,th.r{text-align:right}
       kEnv:"submitted",kCur:"in progress",kNo:"not started",csv:"Export CSV",otro:"Change group",grupos:"‹ Groups",act:"Updates every 20 seconds · ",
       integrante:"Member",estatus:"Status",promedio:"Average",envio:"Submitted",califico:"Rated {a} of {b}",sinEmpezar:"Not started",
       warn:"Some members haven’t submitted yet",wleg:"Team hasn’t submitted all peer evaluations yet",xlsx:"Export XLSX",hoja:"Group {g}",
-      nota:"Average = what their teammates gave them (1 to 4), counting only submitted evaluations.",
+      nota:"Average = what their teammates gave them (1 to 4), counting only submitted evaluations. Equalized final score = each 4 is worth 100%, each 3 85%, each 2 70% and each 1 50%, averaged.",ecualTh:"Equalized final score",
       reset:"Delete this group’s responses",resetSeguro:"Sure? All of group {g} will be deleted. Tap again",borrando:"Deleting…",enCero:"Group {g} reset",
       preparando:"Preparing…",descargado:"CSV downloaded",noSePudo:"Couldn’t do it: ",foot:"Market-based Innovation",
       jala:"↓ Pull to refresh",suelta:"↑ Release to refresh",actualizando:"Refreshing…",actualizado:"Up to date",
@@ -361,6 +362,7 @@ td.r,th.r{text-align:right}
   function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
   function prom(d){ var s=0; for(var i=0;i<d.length;i++) s+=d[i]; return s/d.length; }
   function f2(x){ return (Math.round(x*100)/100).toFixed(2); }
+  function pct(x){ return (Math.round(x*10)/10)+"%"; } /* 95 → «95%», 85.5 → «85.5%» */
   var tt=null;
   function toast(s){ var e=$("toast"); e.textContent=s; e.hidden=false; clearTimeout(tt); tt=setTimeout(function(){ e.hidden=true; },2600); }
   var WARN='<svg class="warn" width="24" height="22" viewBox="0 0 24 22" role="img" aria-label="{a}"><title>{a}</title><path d="M12 1.5 23 20.5H1Z" fill="#F5B800" stroke="#B98600" stroke-width="1.2" stroke-linejoin="round"/><rect x="11" y="7.5" width="2" height="7" fill="#101216"/><rect x="11" y="16.3" width="2" height="2" fill="#101216"/></svg>';
@@ -655,23 +657,23 @@ td.r,th.r{text-align:right}
     $("teams").innerHTML=eqs.map(function(eq){
       var m=al.filter(function(a){ return a.equipo===eq; });
       var completo=m.every(function(a){ return a.estado==="enviado"; });
-      return '<div class="team"><h3><span class="sq"></span>'+esc(eqNom(eq))+(completo?"":WARN.replace(/\{a\}/g,esc(t("warn")))+'<span class="wlegend">'+esc(t("wleg"))+'</span>')+'</h3><table><thead><tr><th>'+t("integrante")+'</th><th>'+t("estatus")+'</th><th class="r">'+t("promedio")+'</th></tr></thead><tbody>'+
+      return '<div class="team"><h3><span class="sq"></span>'+esc(eqNom(eq))+(completo?"":WARN.replace(/\{a\}/g,esc(t("warn")))+'<span class="wlegend">'+esc(t("wleg"))+'</span>')+'</h3><table><thead><tr><th>'+t("integrante")+'</th><th>'+t("estatus")+'</th><th class="r">'+t("promedio")+'</th><th class="r">'+t("ecualTh")+'</th></tr></thead><tbody>'+
         m.map(function(a){
           var c=a.estado==="enviado"?"en":(a.estado==="en curso"?"cu":"");
           var s=a.estado==="enviado"?t("envio"):(a.estado==="en curso"?t("califico",{a:a.hechas,b:a.porEvaluar}):t("sinEmpezar"));
-          return '<tr><td>'+esc(a.nombre)+'</td><td><span class="st2"><span class="dot '+c+'"></span>'+s+'</span></td><td class="r"><span class="avg num">'+(a.promedio==null?"–":f2(a.promedio))+'</span></td></tr>';
+          return '<tr><td>'+esc(a.nombre)+'</td><td><span class="st2"><span class="dot '+c+'"></span>'+s+'</span></td><td class="r"><span class="avg num">'+(a.promedio==null?"–":f2(a.promedio))+'</span></td><td class="r"><span class="avg num">'+(a.ecual==null?"–":pct(a.ecual))+'</span></td></tr>';
         }).join("")+'</tbody></table></div>';
     }).join("");
   }
 
   function celda(v){ v=String(v==null?"":v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
   /* Las mismas filas para CSV y XLSX; los números van como números. porcentaje = promedio / 4 (en CSV como «85%», en XLSX con formato de %).
-     factor_final_ecualizado = promedio de las calificaciones recibidas con 4=100, 3=85, 2=70, 1=50 (lo calcula el servidor) */
+     factor_final_ecualizado = promedio de las calificaciones recibidas con 4=100, 3=85, 2=70, 1=50 (lo calcula el servidor); se exporta como % igual que porcentaje */
   function filasExport(){
     var al=datos.alumnos.filter(function(a){ return a.grupo===grupo; });
     var st={"enviado":t("stEnv"),"en curso":t("stCur"),"sin empezar":t("stNo")};
     return [t("csvHead").concat(cats(),[t("csvProm"),t("csvB100"),t("csvEcual")])].concat(al.map(function(a){
-      return [a.grupo,eqNom(a.equipo),a.nombre,a.matricula,st[a.estado]||a.estado,a.recibidas].concat(cats().map(function(_,i){ return a.porCat?a.porCat[i]:""; }),[a.promedio==null?"":a.promedio,a.promedio==null?"":Math.round(a.promedio/4*10000)/10000,a.ecual==null?"":a.ecual]);
+      return [a.grupo,eqNom(a.equipo),a.nombre,a.matricula,st[a.estado]||a.estado,a.recibidas].concat(cats().map(function(_,i){ return a.porCat?a.porCat[i]:""; }),[a.promedio==null?"":a.promedio,a.promedio==null?"":Math.round(a.promedio/4*10000)/10000,a.ecual==null?"":Math.round(a.ecual*100)/10000]);
     }));
   }
   function nombreArchivo(ext){ return (LANG==="en"?"team-peer-evaluation-group-":"coevaluacion-equipo-grupo-")+String(grupo).replace(/\s+/g,"-")+"-"+new Date().toISOString().slice(0,10)+"."+ext; }
@@ -682,7 +684,7 @@ td.r,th.r{text-align:right}
   $("bCsv").addEventListener("click",function(){
     var b=$("bCsv"); b.disabled=true; b.textContent=t("preparando");
     carga().then(function(){
-      var csv="﻿"+filasExport().map(function(r,k){ return r.map(function(v,i){ return (k>0&&i===r.length-2&&v!=="")?celda(Math.round(v*1000)/10+"%"):celda(v); }).join(","); }).join("\r\n");
+      var csv="﻿"+filasExport().map(function(r,k){ return r.map(function(v,i){ return (k>0&&i>=r.length-2&&v!=="")?celda(Math.round(v*1000)/10+"%"):celda(v); }).join(","); }).join("\r\n");
       bajar(new Blob([csv],{type:"text/csv;charset=utf-8"}),nombreArchivo("csv"));
       toast(t("descargado"));
     }).catch(function(e){ toast(t("noSePudo")+errTxt(e.message)); })
@@ -706,7 +708,7 @@ td.r,th.r{text-align:right}
       var X=r[1], rows=filasExport();
       var ws=X.utils.aoa_to_sheet(rows), pc=rows[0].length-2;
       for(var k=1;k<rows.length;k++){ var ref=X.utils.encode_cell({r:k,c:pc}); if(ws[ref]&&typeof ws[ref].v==="number") ws[ref].z="0.0%";
-        var ref2=X.utils.encode_cell({r:k,c:pc+1}); if(ws[ref2]&&typeof ws[ref2].v==="number") ws[ref2].z="0.0"; }
+        var ref2=X.utils.encode_cell({r:k,c:pc+1}); if(ws[ref2]&&typeof ws[ref2].v==="number") ws[ref2].z="0.0%"; }
       ws["!cols"]=rows[0].map(function(h,i){ var w=String(h).length; rows.forEach(function(f){ w=Math.max(w,String(f[i]==null?"":f[i]).length); }); return {wch:Math.min(w+2,42)}; });
       var wb=X.utils.book_new(); X.utils.book_append_sheet(wb,ws,t("hoja",{g:grupo}));
       var out=X.write(wb,{bookType:"xlsx",type:"array"});
